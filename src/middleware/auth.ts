@@ -4,7 +4,7 @@ import { UserStepModel } from "../models/user-step.model";
 import { UserModel } from "../models/user.model";
 
 const AUTHORIZED_USERS = {
-  [configEnv.CASHIER_ID]: "manager",
+  [configEnv.CASHIER_ID]: "director",
   // "8061136800": "cashier",
 } as const;
 
@@ -51,8 +51,8 @@ export async function authenticateUser(
       }),
     ]);
   }
-
-  return AUTHORIZED_USERS[userId];
+  console.log(findUser?.role);
+  return findUser?.role as string;
 }
 
 export function hasPermission(

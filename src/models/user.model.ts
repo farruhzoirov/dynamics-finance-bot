@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { UserRoles } from "../common/enums/roles.enum";
 
 const userSchema = new Schema({
   userId: { type: String, required: true, unique: true },
@@ -8,9 +9,11 @@ const userSchema = new Schema({
   phone: { type: String, default: null },
   role: {
     type: String,
-    enum: ["manager", "cashier", "director"],
+    enum: UserRoles,
     default: "director",
   },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 });
 
 export const UserModel = model("user", userSchema);

@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 
 const userStepSchema = new Schema({
-  userId: { type: String, required: true, unique: true },
+  userId: { type: String, ref: "user", required: true, unique: true },
   step: { type: String, required: true, default: "start" },
   data: { type: Object, default: {} },
 });

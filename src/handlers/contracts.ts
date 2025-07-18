@@ -8,7 +8,8 @@ const userSessions = new Map<number, UserSession>();
 
 export async function handleCreateContract(ctx: Context) {
   const user = await authenticateUser(ctx);
-  if (!user || !hasPermission(user as string, ["director", "cashier"])) {
+  await ctx.answerCallbackQuery();
+  if (!user || !hasPermission(user as string, ["director", "manager"])) {
     await ctx.reply("❌ Sizga ushbu amalni bajarish uchun ruxsat yo'q.");
     return;
   }
@@ -36,6 +37,7 @@ export async function handleContractCreation(ctx: Context) {
     case "contract_name":
       session.data = { name: text };
       session.step = "contract_amount";
+      await ctx.editMessageReplyMarkup();
       await ctx.reply("💰 Shartnoma miqdorini kiriting (so'mda):");
       break;
 
@@ -95,7 +97,7 @@ export async function handleContractCreation(ctx: Context) {
         //   `👤 Mas'ul: @${contract.responsiblePersonUsername}`,
         {
           parse_mode: "Markdown",
-          reply_markup: getMainMenuKeyboard(user as string),
+          reply_markup: getMainMenuKeyboard(user as string, ""),
         },
       );
       break;

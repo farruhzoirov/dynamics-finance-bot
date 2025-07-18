@@ -2,16 +2,16 @@ import { MyContext } from "../bot";
 import { getMainMenuKeyboard } from "../keyboards";
 import { UserStepModel } from "../models/user-step.model";
 
-export async function handleUzbLang(ctx: MyContext) {
+export async function handleRussianLang(ctx: MyContext) {
   const findUserAction = await UserStepModel.findOne({ userId: ctx.from?.id });
 
   if (findUserAction && !findUserAction?.data?.language) {
-    findUserAction.data.language = "uz";
+    findUserAction.data.language = "ru";
     findUserAction.step = "lang";
     await findUserAction.save();
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup();
-    await ctx.editMessageText("Til tanlandi.");
+    await ctx.editMessageText("Язык выбран..");
     // await ctx.reply(
     //   "Assalomu alaykum! Botimizga xush kelibsiz! Sizga qanday yordam bera olishim mumkin?",
     //   {

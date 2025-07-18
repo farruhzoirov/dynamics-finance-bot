@@ -1,10 +1,10 @@
 import { InlineKeyboard } from "grammy";
-import { UserStepModel } from "./models/user-step.model";
+import { UserRoles } from "./common/enums/roles.enum";
 
 export function getMainMenuKeyboard(userRole: string, userActions: any) {
   const keyboard = new InlineKeyboard();
 
-  if (userRole === "manager") {
+  if (userRole === UserRoles.manager) {
     keyboard
       .text(
         userActions.data?.language === "uz" ? "🏢 Office" : "🏢 Офис",
@@ -41,15 +41,28 @@ export function getMainMenuKeyboard(userRole: string, userActions: any) {
       .row();
   }
 
-  if (userRole === "customer") {
+  if (userRole === UserRoles.director) {
     keyboard
-      .text("📋 Mening shartnomalarim", "my_contracts")
-      .text("💳 Qoldiq", "balance")
+      .text(
+        userActions.data?.language === "uz"
+          ? "➕ Kirim qo'shish"
+          : "➕ Добавить приход",
+        "add_income",
+      )
+      .text(
+        userActions.data?.language === "uz" ? "💸 Chiqim" : "💸 Расход",
+        "expense",
+      )
+      .row()
+      .text(
+        userActions.data?.language === "uz" ? "💳 Balans" : "💳 Баланс",
+        "balance",
+      )
+      .text(
+        userActions.data?.language === "uz" ? "📋 Shartnomalar" : "📋 Договори",
+        "contracts",
+      )
       .row();
-  }
-
-  if (userRole === "director") {
-    keyboard.text("📈 Hisobot", "report");
   }
 
   return keyboard;
