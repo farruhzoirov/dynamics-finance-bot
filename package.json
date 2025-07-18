@@ -1,0 +1,35 @@
+{
+  "name": "dynamics-market-finbot",
+  "version": "1.0.0",
+  "description": "A simple and secure Telegram bot for tracking a company’s income and expenses.",
+  "keywords": [
+    "telegram-bot"
+  ],
+  "homepage": "https://github.com/farruhzoirov/dynamics-market-finbot#readme",
+  "bugs": {
+    "url": "https://github.com/farruhzoirov/dynamics-market-finbot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/farruhzoirov/dynamics-market-finbot.git"
+  },
+  "license": "ISC",
+  "author": "Farruh Zoirov",
+  "type": "commonjs",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "ts-node-dev --respawn --transpile-only src/bot.ts"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "grammy": "^1.37.0",
+    "mongoose": "^8.16.4",
+    "ts-node": "^10.9.2"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0",
+    "prettier": "3.6.2",
+    "ts-node-dev": "^2.0.0"
+  }
+}
