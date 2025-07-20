@@ -1,9 +1,11 @@
 import { MyContext } from "../bot";
-import { getMainMenuKeyboard } from "../keyboards";
 import { UserStepModel } from "../models/user-step.model";
+import { UserModel } from "../models/user.model";
+import { handleInitialMenu } from "./initial";
 
 export async function handleUzbLang(ctx: MyContext) {
   const findUserAction = await UserStepModel.findOne({ userId: ctx.from?.id });
+  const user = await UserModel.findOne({ userId: ctx.from?.id });
 
   if (findUserAction && !findUserAction?.data?.language) {
     findUserAction.data.language = "uz";
@@ -12,11 +14,6 @@ export async function handleUzbLang(ctx: MyContext) {
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup();
     await ctx.editMessageText("Til tanlandi.");
-    // await ctx.reply(
-    //   "Assalomu alaykum! Botimizga xush kelibsiz! Sizga qanday yordam bera olishim mumkin?",
-    //   {
-    //     reply_markup: getMainMenuKeyboard("cashier", findUserAction),
-    //   },
-    // );
+    await handleInitialMenu(ctx);
   }
 }

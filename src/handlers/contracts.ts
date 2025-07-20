@@ -2,7 +2,6 @@ import { Context } from "grammy";
 import { configEnv } from "../config/config-env";
 import { authenticateUser, hasPermission } from "../middleware/auth";
 import { UserSession } from "../types";
-import { getMainMenuKeyboard } from "../keyboards";
 
 const userSessions = new Map<number, UserSession>();
 
@@ -95,10 +94,10 @@ export async function handleContractCreation(ctx: Context) {
         //   `📝 Nom: ${contract.name}\n` +
         //   `💰 Miqdor: ${formatCurrency(contract.amount)}\n` +
         //   `👤 Mas'ul: @${contract.responsiblePersonUsername}`,
-        {
-          parse_mode: "Markdown",
-          reply_markup: getMainMenuKeyboard(user as string, ""),
-        },
+        // {
+        //   parse_mode: "Markdown",
+        //   reply_markup: getMainMenuKeyboard(user as string, ""),
+        // },
       );
       break;
   }

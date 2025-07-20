@@ -1,6 +1,6 @@
 import { MyContext } from "../bot";
-import { getMainMenuKeyboard } from "../keyboards";
 import { UserStepModel } from "../models/user-step.model";
+import { handleInitialMenu } from "./initial";
 
 export async function handleRussianLang(ctx: MyContext) {
   const findUserAction = await UserStepModel.findOne({ userId: ctx.from?.id });
@@ -12,11 +12,6 @@ export async function handleRussianLang(ctx: MyContext) {
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup();
     await ctx.editMessageText("Язык выбран..");
-    // await ctx.reply(
-    //   "Assalomu alaykum! Botimizga xush kelibsiz! Sizga qanday yordam bera olishim mumkin?",
-    //   {
-    //     reply_markup: getMainMenuKeyboard("cashier", findUserAction),
-    //   },
-    // );
+    await handleInitialMenu(ctx);
   }
 }

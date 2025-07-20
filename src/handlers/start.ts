@@ -1,11 +1,9 @@
-import { InlineKeyboard, Keyboard } from "grammy";
-import { authenticateUser } from "../middleware/auth";
-import { getMainMenuKeyboard } from "../keyboards";
+import { InlineKeyboard } from "grammy";
 import { MyContext } from "../bot";
 import { UserStepModel } from "../models/user-step.model";
+import { handleInitialMenu } from "./initial";
 
 export async function handleStart(ctx: MyContext) {
-  const userRole = await authenticateUser(ctx);
   const findUserActions = await UserStepModel.findOne({ userId: ctx.from?.id });
 
   if (!findUserActions) return;
@@ -33,35 +31,9 @@ export async function handleStart(ctx: MyContext) {
         description: `${findUserActions.data?.language === "uz" ? "Botni ishga tushirish" : "Запустить бота"}`,
       },
     ]);
+  }
 
-    await ctx.reply(
-      findUserActions.data?.language === "uz"
-        ? "Assalomu alaykum! Botga xush kelibsiz!"
-        : "Здравствуйте! Добро пожаловать в бот!",
-      {
-        reply_markup: getMainMenuKeyboard(userRole as string, findUserActions),
-      },
-    );
-    const mainMenu = new Keyboard()
-      .text(
-        findUserActions?.data?.language === "uz"
-          ? "🏠 Asosiy menyu"
-          : "🏠 Главное меню",
-      )
-      .text(
-        findUserActions?.data?.language === "uz"
-          ? "⚙ Sozlamalar"
-          : "⚙ Настройки",
-      )
-      .row();
-
-    await ctx.reply(
-      findUserActions.data?.language === "uz"
-        ? "⬇️ Asosiy menyu"
-        : "⬇️ Главное меню",
-      {
-        reply_markup: mainMenu.resized(),
-      },
-    );
+  if (findUserActions.data?.language) {
+    await handleInitialMenu(ctx);
   }
 }

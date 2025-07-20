@@ -2,7 +2,7 @@ import { Schema, model } from "mongoose";
 import { UserRoles } from "../common/enums/roles.enum";
 
 const userSchema = new Schema({
-  userId: { type: String, required: true, unique: true },
+  userId: { type: Number, required: true, unique: true },
   userName: { type: String, default: null },
   userFirstName: { type: String, default: null },
   userLastName: { type: String, default: null },

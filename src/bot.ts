@@ -6,21 +6,28 @@ import {
   session,
   type SessionFlavor,
 } from "grammy";
-import { configEnv } from "./config/config-env";
-import { handleStart } from "./handlers/start";
 import {
-  handleContractCreation,
-  handleCreateContract,
-} from "./handlers/contracts";
-import { authenticateUser } from "./middleware/auth";
-import { handleUzbLang } from "./handlers/uzbek";
+  ConversationFlavor,
+  conversations,
+  createConversation,
+} from "@grammyjs/conversations";
+import { configEnv } from "./config/config-env";
+import { authMiddleware } from "./middleware/auth";
 import { SessionData } from "./types";
 import { connectToDatabase } from "./db/database";
+import { handleIncomeConversation } from "./handlers/director/director";
 
-export type MyContext = Context & SessionFlavor<SessionData>;
+export type MyContext = Context &
+  SessionFlavor<SessionData> &
+  ConversationFlavor<any>;
 
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
-import "./commands/commands";
+
+bot.use(conversations());
+bot.use(createConversation(handleIncomeConversation));
+bot.use(authMiddleware);
+
+import "./commands/index";
 
 const initialSession: SessionData = {
   language: undefined,
@@ -34,17 +41,8 @@ bot.use(
 
 connectToDatabase().then();
 console.log("Connected to MongoDB successfully!");
-
-bot
-  .start()
-  .then(() => {
-    connectToDatabase().then();
-    console.log("Connected to MongoDB successfully!");
-    console.log("Bot started successfully!");
-  })
-  .catch((error) => {
-    console.error("Failed to start the bot:", error);
-  });
+bot.start().then();
+console.log("Bot started successfully!");
 
 bot.catch((err) => {
   const ctx = err.ctx;
