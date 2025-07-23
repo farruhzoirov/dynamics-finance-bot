@@ -11,7 +11,7 @@ export async function handleStart(ctx: MyContext) {
   if (
     findUserActions &&
     !findUserActions?.data?.language &&
-    findUserActions.step === "start"
+    findUserActions.step === "main_menu"
   ) {
     const languageKeyboard = new InlineKeyboard()
       .text("🇺🇿 Oʻzbekcha", "uzbek")
@@ -20,7 +20,6 @@ export async function handleStart(ctx: MyContext) {
       reply_markup: languageKeyboard,
     });
   }
-
   findUserActions.step = "lang";
   await findUserActions.save();
 

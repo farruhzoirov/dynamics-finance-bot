@@ -1,2 +1,2 @@
 import "./commands";
-import "./director/director";
+import "./director/commands";

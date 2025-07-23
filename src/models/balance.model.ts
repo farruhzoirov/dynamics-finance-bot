@@ -1,9 +1,10 @@
 import { Schema, model } from "mongoose";
+import { Currency } from "../common/enums/currency.enum";
 
 const BalanceSchema = new Schema(
   {
     balance: { type: Number, default: 0 },
-    description: { type: String, default: null },
+    currency: { type: String, enum: Currency, required: true },
   },
   {
     timestamps: true,

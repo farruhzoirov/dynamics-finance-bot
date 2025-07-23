@@ -49,7 +49,7 @@ export function getMainMenuKeyboardForDirector(userActions: any) {
     )
     .text(
       userActions.data?.language === "uz" ? "💸 Chiqim" : "💸 Расход",
-      "expense",
+      "expense_director",
     )
     .row()
     .text(
@@ -58,7 +58,7 @@ export function getMainMenuKeyboardForDirector(userActions: any) {
     )
     .text(
       userActions.data?.language === "uz" ? "📋 Shartnomalar" : "📋 Договори",
-      "contracts",
+      "contracts_director",
     )
     .row();
   return keyboard;

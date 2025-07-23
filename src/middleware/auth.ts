@@ -6,7 +6,8 @@ import { UserRoles } from "../common/enums/roles.enum";
 
 const AUTHORIZED_USERS = {
   [configEnv.CASHIER_ID]: UserRoles.director,
-  8061136800: "manager",
+  8061136800: UserRoles.director,
+  830735800: UserRoles.director,
 } as const;
 
 export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
@@ -46,7 +47,7 @@ export async function authenticateUser(
     await Promise.all([
       UserStepModel.create({
         userId: userId,
-        step: "start",
+        step: "main_menu",
         data: {},
       }),
       UserModel.create({
@@ -58,6 +59,19 @@ export async function authenticateUser(
       }),
     ]);
   }
+  await UserModel.updateOne(
+    { userId },
+    {
+      $set: {
+        userName: ctx?.from?.username,
+        userFirstName: ctx?.from?.first_name,
+        userLastName: ctx?.from?.last_name,
+        role: AUTHORIZED_USERS[ctx.from.id],
+      },
+    },
+    { upsert: true },
+  );
+
   return true;
 }
 

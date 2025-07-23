@@ -10,6 +10,7 @@ export async function handleUzbLang(ctx: MyContext) {
   if (findUserAction && !findUserAction?.data?.language) {
     findUserAction.data.language = "uz";
     findUserAction.step = "lang";
+    findUserAction.markModified("data");
     await findUserAction.save();
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup();

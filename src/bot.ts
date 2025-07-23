@@ -6,25 +6,15 @@ import {
   session,
   type SessionFlavor,
 } from "grammy";
-import {
-  ConversationFlavor,
-  conversations,
-  createConversation,
-} from "@grammyjs/conversations";
 import { configEnv } from "./config/config-env";
 import { authMiddleware } from "./middleware/auth";
 import { SessionData } from "./types";
 import { connectToDatabase } from "./db/database";
-import { handleIncomeConversation } from "./handlers/director/director";
 
-export type MyContext = Context &
-  SessionFlavor<SessionData> &
-  ConversationFlavor<any>;
+export type MyContext = Context & SessionFlavor<SessionData>;
 
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
 
-bot.use(conversations());
-bot.use(createConversation(handleIncomeConversation));
 bot.use(authMiddleware);
 
 import "./commands/index";
@@ -49,7 +39,7 @@ bot.catch((err) => {
   console.error(`Error while handling update ${ctx.update.update_id}:`);
   const e = err.error;
   if (e instanceof GrammyError) {
-    console.error("Error in request:", e.description);
+    console.error("Error in request:", e);
   } else if (e instanceof HttpError) {
     console.error("Could not contact Telegram:", e);
   } else {

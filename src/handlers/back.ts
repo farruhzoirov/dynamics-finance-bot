@@ -8,7 +8,8 @@ export async function handleBack(ctx: MyContext) {
   if (!findUserActions) return;
 
   if (findUserActions.step === "settings") {
-    findUserActions.step = "start";
+    findUserActions.step = "main_menu";
+    findUserActions.markModified("step")
     await findUserActions.save();
 
     const backKeyboard = new Keyboard()
