@@ -5,7 +5,6 @@ import { changeLanguageHandler, getSettingsMenu } from "../handlers/settings";
 import { handleRussianLang } from "../handlers/russian";
 import { handleBack } from "../handlers/back";
 import { handleMainMenu } from "../handlers/main-menu";
-import { UserStepModel } from "../models/user-step.model";
 
 // Start
 bot.command("start", handleStart);

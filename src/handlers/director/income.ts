@@ -112,7 +112,7 @@ export async function handleIncomeConfirmation(ctx: MyContext) {
 
   if (answer === "yes") {
     const { type, amount, currency, description, ...rest } = userActions.data;
-    const exchangeRate = await getCurrency(userActions.data.currency);
+    const exchangeRate = await getCurrency();
     if (exchangeRate === 0) {
       await ctx.reply("Error: Exchange rate is 0");
       return;

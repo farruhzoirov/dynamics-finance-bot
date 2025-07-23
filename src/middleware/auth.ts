@@ -1,16 +1,17 @@
-import { Context } from "grammy";
+import { Context, NextFunction } from "grammy";
 import { configEnv } from "../config/config-env";
 import { UserStepModel } from "../models/user-step.model";
 import { UserModel } from "../models/user.model";
 import { UserRoles } from "../common/enums/roles.enum";
 
 const AUTHORIZED_USERS = {
-  [configEnv.CASHIER_ID]: UserRoles.director,
+  [configEnv.CASHIER_ID]: UserRoles.manager,
   8061136800: UserRoles.director,
   830735800: UserRoles.director,
+  689888057: UserRoles.director,
 } as const;
 
-export async function authMiddleware(ctx: Context, next: () => Promise<void>) {
+export async function authMiddleware(ctx: Context, next: NextFunction) {
   const isAuth = await authenticateUser(ctx);
   if (isAuth) {
     await next();

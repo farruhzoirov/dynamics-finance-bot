@@ -1,4 +1,4 @@
-import { InlineKeyboard } from "grammy";
+import { InlineKeyboard, NextFunction } from "grammy";
 import { bot, MyContext } from "../../bot";
 import { UserStepModel } from "../../models/user-step.model";
 import {
@@ -11,6 +11,7 @@ import {
   handleExpenseConfirmation,
   handleExpenseCurrency,
 } from "../../handlers/director/expense";
+import { getBalanceHandler } from "../../handlers/balance";
 
 // For income
 bot.callbackQuery("add_income", handleIncomeConversation);
@@ -28,17 +29,17 @@ bot.callbackQuery(
   handleExpenseConfirmation,
 );
 
-bot.callbackQuery("balance");
+bot.callbackQuery("balance", getBalanceHandler);
 bot.callbackQuery("contracts_director");
 
-bot.on("message:text", async (ctx: MyContext) => {
+bot.on("message:text", async (ctx: MyContext, next: NextFunction) => {
   const userId = ctx!.from!.id as number;
   let userActions = await UserStepModel.findOne({ userId: userId });
 
   if (userActions?.step === "ask_amount_income") {
     const amount = parseFloat(ctx!.message!.text as string);
     if (isNaN(amount)) {
-      ctx.reply(
+      await ctx.reply(
         userActions?.data.language === "uz"
           ? "❌ Iltimos, qiymatni faqat sonlarda kiriting."
           : "❌ Пожалуйста, введите значение только цифрами.",
@@ -131,7 +132,7 @@ bot.on("message:text", async (ctx: MyContext) => {
   if (userActions?.step === "ask_amount_expense") {
     const amount = parseFloat(ctx!.message!.text as string);
     if (isNaN(amount)) {
-      ctx.reply(
+      await ctx.reply(
         userActions?.data.language === "uz"
           ? "❌ Iltimos, qiymatni faqat sonlarda kiriting."
           : "❌ Пожалуйста, введите значение только цифрами.",
@@ -220,6 +221,6 @@ bot.on("message:text", async (ctx: MyContext) => {
       reply_markup: confirmExpenseKeyboard,
     });
   }
+
+  await next();
 });
-
-

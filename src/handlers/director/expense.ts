@@ -115,7 +115,7 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
 
   if (answer === "yes") {
     const { type, amount, currency, description, ...rest } = userActions.data;
-    const exchangeRate = await getCurrency(userActions.data.currency);
+    const exchangeRate = await getCurrency();
     if (exchangeRate === 0) {
       await ctx.reply("Error: Exchange rate is 0");
       return;
@@ -123,16 +123,30 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
 
     const user = await UserModel.findOne({ userId: userId });
 
-    if (
-      userActions.data.currency === Currency.USD ||
-      userActions.data.currency === Currency.UZS
-    ) {
-      const balanceInUSD = await getBalance(Currency.USD);
-      if (balanceInUSD.balance < amount) {
-        const difference = amount - balanceInUSD.balance;
-        const converToSum = difference * exchangeRate;
+    const balance = await getBalance(
+      userActions.data.currency === Currency.USD ? Currency.USD : Currency.UZS,
+    );
+    console.log("Balance", balance);
+    if (balance.balance < amount) {
+      const difference = amount - balance.balance;
+      if (userActions.data.currency === Currency.USD) {
+        const convertToSum = difference * exchangeRate;
         const balanceInSum = await getBalance(Currency.UZS);
-        if (balanceInSum.balance < converToSum) {
+        if (balanceInSum.balance < convertToSum) {
+          await ctx.reply(
+            userActions.data.language === "uz"
+              ? "Sizning balansingizda yetarli mablag' yo'q."
+              : "Недостаточно средств на вашем балансе.",
+          );
+          return;
+        }
+      }
+      if (userActions.data.currency === Currency.UZS) {
+        const convertToUSD = difference / exchangeRate;
+        console.log(convertToUSD);
+
+        const balanceInUSD = await getBalance(Currency.USD);
+        if (balanceInUSD.balance < convertToUSD) {
           await ctx.reply(
             userActions.data.language === "uz"
               ? "Sizning balansingizda yetarli mablag' yo'q."
@@ -142,6 +156,7 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
         }
       }
     }
+
     await Promise.all([
       TransactionModel.create({
         type: type,
