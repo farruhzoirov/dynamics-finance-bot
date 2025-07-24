@@ -9,9 +9,7 @@ export async function getBalanceHandler(ctx: MyContext) {
   const userActions = await UserStepModel.findOne({ userId: userId });
   await ctx.answerCallbackQuery();
 
-  if (!userActions) {
-    return;
-  }
+  if (!userActions) return;
 
   const [balanceInUSD, balanceUZS, currency] = await Promise.all([
     getBalance(Currency.USD),

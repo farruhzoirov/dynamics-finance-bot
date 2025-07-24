@@ -7,6 +7,8 @@ export async function handleContractCreation(ctx: MyContext) {
     const userActions = await UserStepModel.findOne({ userId: userId });
     await ctx.answerCallbackQuery();
 
+    if (!userActions) return;
+
     await UserStepModel.findOneAndUpdate(
       { userId },
       {
