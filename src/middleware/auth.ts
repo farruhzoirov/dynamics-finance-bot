@@ -9,6 +9,7 @@ const AUTHORIZED_USERS = {
   8061136800: UserRoles.director,
   830735800: UserRoles.director,
   689888057: UserRoles.director,
+  106295438: UserRoles.manager,
 } as const;
 
 export async function authMiddleware(ctx: Context, next: NextFunction) {
@@ -22,6 +23,7 @@ export async function authenticateUser(
   ctx: Context,
 ): Promise<boolean | string> {
   const userId = ctx.from?.id;
+  console.log(userId)
   const userName = ctx.from?.username;
   const userFirstName = ctx.from?.first_name;
   const userLastName = ctx.from?.last_name;

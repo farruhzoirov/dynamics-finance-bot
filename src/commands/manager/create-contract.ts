@@ -10,7 +10,7 @@ import { handleContractConfirmation } from "../../handlers/manager/confirm-contr
 
 bot.callbackQuery("create_contract", handleContractCreation);
 bot.callbackQuery(["contract_usd", "contract_uzs"], handleContractCurreny);
-bot.callbackQuery("confirm_contract_request", handleContractConfirmation);
+bot.callbackQuery(/^confirm_contract_request:(.+)$/, handleContractConfirmation);
 
 bot.on("message:text", async (ctx) => {
   const text = ctx?.message?.text;
@@ -220,16 +220,16 @@ bot.on("message:text", async (ctx) => {
     const confirmKeyboard = new InlineKeyboard()
       .text(
         userActions.data.language === "uz" ? "✅ Tasdiqlash" : "✅ Подтвердить",
-        "confirm_contract_request",
+        `confirm_contract_request:${userActions.data.contractId}`,
       )
       .text(
         userActions.data.language === "uz" ? "❌ Bekor qilish" : "❌ Отменить",
-        "cancel_contract_request",
+        `cancel_contract_request:${userActions.data.contractId}`,
       );
 
     await ctx.reply(
       userActions.data.language === "uz"
-        ? `📋 Quyidagi ma'lumotlarni tasdiqlang:\n
+        ? `📋 Quyidagi ma'lumotlarni tasdiqlang:\n  
 🆔 Unikal ID: ${uniqueId}
 📄 Shartnoma ID: ${userActions.data.contractId}
 💰 Shartnoma summasi: ${userActions.data.contractAmount}

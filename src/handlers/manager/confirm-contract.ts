@@ -12,6 +12,8 @@ export async function handleContractConfirmation(ctx: MyContext) {
     getCurrency(),
   ]);
   await ctx.answerCallbackQuery();
+  
+  if (!ctx.match) return;
 
   if (!directors.length) {
     return await ctx.reply("Direktor topilmadi.");
@@ -29,6 +31,7 @@ export async function handleContractConfirmation(ctx: MyContext) {
     const findDirectorActions = await UserStepModel.findOne({
       userId: director.userId,
     });
+
     if (!findDirectorActions) continue;
     const directorLang = findDirectorActions.data.language;
     const text =
@@ -39,15 +42,15 @@ export async function handleContractConfirmation(ctx: MyContext) {
     const actionKeyboard = new InlineKeyboard()
       .text(
         directorLang === "uz" ? "👀 Ko'rib chiqilmoqda" : "👀 В процессе",
-        "in_progress",
+        `in_progress:${ctx.match[1]}`,
       )
       .text(
         directorLang === "uz" ? "✅ Tasdiqlash" : "✅ Подтвердить",
-        "director_approve",
+        `director_approve:${ctx.match[1]}`,
       )
       .text(
         directorLang === "uz" ? "❌ Bekor qilish" : "❌ Отменить",
-        "director_reject",
+        `director_reject:${ctx.match[1]}`,
       );
     await ctx.api.sendMessage(director.userId, text, {
       reply_markup: actionKeyboard,
