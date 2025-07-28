@@ -1,21 +1,21 @@
-import { Context } from "grammy";
-import { configEnv } from "../config/config-env";
-import { authenticateUser, hasPermission } from "../middleware/auth";
-import { UserSession } from "../types";
+import { Context } from 'grammy';
+import { configEnv } from '../config/config-env';
+import { authenticateUser, hasPermission } from '../middleware/auth';
+import { UserSession } from '../types';
 
 const userSessions = new Map<number, UserSession>();
 
 export async function handleCreateContract(ctx: Context) {
   const user = await authenticateUser(ctx);
   await ctx.answerCallbackQuery();
-  if (!user || !hasPermission(user as string, ["director", "manager"])) {
+  if (!user || !hasPermission(user as string, ['director', 'manager'])) {
     await ctx.reply("❌ Sizga ushbu amalni bajarish uchun ruxsat yo'q.");
     return;
   }
 
-  userSessions.set(+configEnv.CASHIER_ID as number, { step: "contract_name" });
+  userSessions.set(+configEnv.CASHIER_ID as number, { step: 'contract_name' });
   await ctx.reply(
-    "📝 **Yangi shartnoma yaratish**\n\nShartnoma nomini kiriting:",
+    '📝 **Yangi shartnoma yaratish**\n\nShartnoma nomini kiriting:'
   );
 }
 

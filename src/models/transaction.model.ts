@@ -1,6 +1,6 @@
-import { Schema, model } from "mongoose";
-import { TransactionType } from "../common/enums/transaction.enum";
-import { Currency } from "../common/enums/currency.enum";
+import { Schema, model } from 'mongoose';
+import { TransactionType } from '../common/enums/transaction.enum';
+import { Currency } from '../common/enums/currency.enum';
 
 const TransactionSchema = new Schema(
   {
@@ -10,11 +10,11 @@ const TransactionSchema = new Schema(
     exchangeRate: { type: Number, default: 1 },
     contractId: { type: String, default: null },
     description: { type: String, default: null },
-    createdBy: { type: String, default: null },
+    createdBy: { type: String, default: null }
   },
   {
-    timestamps: true,
-  },
+    timestamps: true
+  }
 );
 
-export const TransactionModel = model("transaction", TransactionSchema);
+export const TransactionModel = model('transaction', TransactionSchema);

@@ -1,5 +1,5 @@
-import { MyContext } from "../../bot";
-import { UserStepModel } from "../../models/user-step.model";
+import { MyContext } from '../../bot';
+import { UserStepModel } from '../../models/user-step.model';
 
 export async function handleContractCreation(ctx: MyContext) {
   try {
@@ -13,19 +13,19 @@ export async function handleContractCreation(ctx: MyContext) {
       { userId },
       {
         $set: {
-          step: "ask_contract_id",
-        },
+          step: 'ask_contract_id'
+        }
       },
-      { upsert: true },
+      { upsert: true }
     );
 
     await ctx.reply(
-      userActions?.data.language === "uz"
-        ? "Shartnoma Idsini kiriting:"
-        : "Введите ID договора:",
+      userActions?.data.language === 'uz'
+        ? 'Shartnoma raqamini kiriting:'
+        : 'Введите номер договора:'
     );
   } catch (err) {
     console.error(err);
-    await ctx.reply("Error creation contract: handleContractCreation");
+    await ctx.reply('Error creation contract: handleContractCreation');
   }
 }

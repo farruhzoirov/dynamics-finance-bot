@@ -1,13 +1,13 @@
 export type SessionData = {
-  language?: "uz" | "ru";
-  step?: "lang" | "main_menu" | "create_contract" | "contract_details";
+  language?: 'uz' | 'ru';
+  step?: 'lang' | 'main_menu' | 'create_contract' | 'contract_details';
 };
 
 export interface User {
   _id?: string;
   telegramId: number;
   username: string;
-  role: "director" | "cashier" | "responsible" | "customer";
+  role: 'director' | 'cashier' | 'responsible' | 'customer';
   createdAt: Date;
 }
 
@@ -34,7 +34,7 @@ export interface ContractStage {
 
 export interface CashTransaction {
   _id?: string;
-  type: "kirim" | "chiqim";
+  type: 'kirim' | 'chiqim';
   amount: number;
   date: Date;
   contractId?: string;
@@ -49,11 +49,11 @@ export interface UserSession {
 }
 
 export const CONTRACT_STAGES = [
-  "Shartnoma imzolash",
-  "Tovar sotib olish",
-  "Tovar logistikasi",
-  "Sertifikatlashtirish",
-  "Boshqa xarajatlar",
-  "Mijoz bonusi",
-  "Menejer ulushi",
+  'Shartnoma imzolash',
+  'Tovar sotib olish',
+  'Tovar logistikasi',
+  'Sertifikatlashtirish',
+  'Boshqa xarajatlar',
+  'Mijoz bonusi',
+  'Menejer ulushi'
 ];

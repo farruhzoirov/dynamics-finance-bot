@@ -1,5 +1,5 @@
 {
-  "editor.fontFamily": "Fira Code, JetBrains Mono, Consolas, 'Courier New', monospace",
+  // "editor.fontFamily": "Fira Code, JetBrains Mono, Consolas, 'Courier New', monospace",
   "editor.fontLigatures": true,
   "editor.fontSize": 14,
   "editor.lineHeight": 22,
@@ -16,7 +16,7 @@
   "editor.renderWhitespace": "boundary",
   "editor.cursorSmoothCaretAnimation": true,
   "editor.minimap.enabled": false,
-  
+
   "files.autoSave": "onWindowChange",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "explorer.confirmDelete": false,

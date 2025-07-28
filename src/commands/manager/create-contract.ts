@@ -1,66 +1,69 @@
-import { InlineKeyboard } from "grammy";
-import { bot } from "../../bot";
-import { handleContractCreation } from "../../handlers/manager/create-contract";
-import { handleContractCurreny } from "../../handlers/manager/currency";
-import { getCurrency } from "../../helpers/get-currency";
-import { ContractModel } from "../../models/contract.model";
-import { UserStepModel } from "../../models/user-step.model";
-import { isValidDateFormat } from "../../validators/date.validator";
-import { handleContractConfirmation } from "../../handlers/manager/confirm-contract";
+import { InlineKeyboard } from 'grammy';
+import { bot } from '../../bot';
+import { handleContractCreation } from '../../handlers/manager/create-contract';
+import { handleContractCurreny } from '../../handlers/manager/currency';
+import { getCurrency } from '../../helpers/get-currency';
+import { ContractModel } from '../../models/contract.model';
+import { UserStepModel } from '../../models/user-step.model';
+import { isValidDateFormat } from '../../validators/date.validator';
+import { handleContractRequestConfirmation } from '../../handlers/manager/confirm-contract';
 
-bot.callbackQuery("create_contract", handleContractCreation);
-bot.callbackQuery(["contract_usd", "contract_uzs"], handleContractCurreny);
-bot.callbackQuery(/^confirm_contract_request:(.+)$/, handleContractConfirmation);
+bot.callbackQuery('create_contract', handleContractCreation);
+bot.callbackQuery(['contract_usd', 'contract_uzs'], handleContractCurreny);
+bot.callbackQuery(
+  /^confirm_contract_request:(.+)$/,
+  handleContractRequestConfirmation
+);
 
-bot.on("message:text", async (ctx) => {
+bot.on('message:text', async (ctx) => {
   const text = ctx?.message?.text;
   const userId = ctx?.from?.id;
   let userActions = await UserStepModel.findOne({ userId: userId });
 
   if (!userActions) return;
 
-  if (userActions.step === "ask_contract_id") {
+  if (userActions.step === 'ask_contract_id') {
     const contractId = parseInt(text);
 
     if (isNaN(contractId)) {
       await ctx.reply(
-        userActions?.data.language === "uz"
-          ? "❌ Iltimos, qiymatni faqat sonlarda kiriting."
-          : "❌ Пожалуйста, введите значение только цифрами.",
+        userActions?.data.language === 'uz'
+          ? '❌ Iltimos, qiymatni faqat sonlarda kiriting.'
+          : '❌ Пожалуйста, введите значение только цифрами.'
       );
       return;
     }
 
     await ctx.reply(
-      userActions?.data?.language === "uz"
-        ? "Iltimos, shartnoma bo‘yicha summani kiriting:"
-        : "Пожалуйста, введите сумму по договору:",
+      userActions?.data?.language === 'uz'
+        ? 'Iltimos, shartnoma bo‘yicha summani kiriting:'
+        : 'Пожалуйста, введите сумму по договору:'
     );
 
     await UserStepModel.findOneAndUpdate(
       { userId },
       {
         $set: {
-          step: "ask_contract_amount",
+          step: 'ask_contract_amount',
           data: {
             ...userActions?.data,
-            contractId: contractId,
-          },
-        },
+            contractId: contractId
+          }
+        }
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
   }
 
-  if (userActions?.step === "ask_contract_amount") {
-    const contractAmountText = ctx?.message?.text;
-    const contractAmount = parseFloat(contractAmountText);
+  if (userActions?.step === 'ask_contract_amount') {
+    const contractAmountText = ctx?.message?.text.replace(/[\s.,-]/g, '');
+    const contractAmount = parseInt(contractAmountText);
 
-    if (isNaN(contractAmount)) {
+    if (isNaN(contractAmount) || contractAmount < 0) {
       await ctx.reply(
-        userActions?.data.language === "uz"
-          ? "❌ Iltimos, qiymatni faqat sonlarda kiriting."
-          : "❌ Пожалуйста, введите значение только цифрами.",
+        userActions?.data.language === 'uz'
+          ? '❌ Iltimos, qiymatni faqat musbat sonlarda kiriting.'
+          : '❌ Пожалуйста, вводите только положительные числа.'
       );
       return;
     }
@@ -69,120 +72,120 @@ bot.on("message:text", async (ctx) => {
       { userId },
       {
         $set: {
-          step: "ask_contract_currency",
+          step: 'ask_contract_currency',
           data: {
             ...userActions?.data,
-            contractAmount: contractAmount,
-          },
-        },
+            contractAmount: contractAmount
+          }
+        }
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
 
     return await ctx.reply(
-      userActions?.data.language === "uz"
-        ? "Valyutani tanlang:"
-        : "Выберите валюту:",
+      userActions?.data.language === 'uz'
+        ? 'Valyutani tanlang:'
+        : 'Выберите валюту:',
       {
         reply_markup: {
           inline_keyboard: [
             [
               {
                 text:
-                  userActions?.data.language === "uz"
+                  userActions?.data.language === 'uz'
                     ? "So'm (UZS)"
-                    : "Сум (UZS)",
-                callback_data: "contract_uzs",
+                    : 'Сум (UZS)',
+                callback_data: 'contract_uzs'
               },
               {
                 text:
-                  userActions?.data.language === "uz"
-                    ? "Dollar (USD)"
-                    : "Доллар (USD)",
-                callback_data: "contract_usd",
-              },
-            ],
-          ],
-        },
-      },
+                  userActions?.data.language === 'uz'
+                    ? 'Dollar (USD)'
+                    : 'Доллар (USD)',
+                callback_data: 'contract_usd'
+              }
+            ]
+          ]
+        }
+      }
     );
   }
 
-  if (userActions?.step === "ask_contract_date") {
+  if (userActions?.step === 'ask_contract_date') {
     const contractDate = ctx?.message?.text;
     const isValidDate = isValidDateFormat(contractDate);
 
     if (!isValidDate) {
       await ctx.reply(
-        userActions.data.language === "uz"
-          ? "❌ Iltimos, shartnoma tuzilgan sanani DD.MM.YYYY mana shu formatda kiriting. Masalan: (01.01.2025)"
-          : "❌ Пожалуйста, введите дату заключения договора в формате ДД.ММ.ГГГГ. Например: (01.01.2025)",
+        userActions.data.language === 'uz'
+          ? '❌ Iltimos, shartnoma tuzilgan sanani DD.MM.YYYY mana shu formatda kiriting. Masalan: (01.01.2025)'
+          : '❌ Пожалуйста, введите дату заключения договора в формате ДД.ММ.ГГГГ. Например: (01.01.2025)'
       );
       return;
     }
 
     await ctx.reply(
-      userActions?.data?.language === "uz"
-        ? "Iltimos Managerning to'liq F.I.SH sini kiriting :"
-        : "Пожалуйста, введите полное Ф.И.О. менеджера:",
+      userActions?.data?.language === 'uz'
+        ? "Iltimos Managerning to'liq F.I.SH sini yoki shartnoma tuzilayotgan kompaniya yoki firma nomini kiriting :"
+        : 'Пожалуйста, введите полные Ф.И.О. менеджера или название компании (фирмы), с которой заключается договор :'
     );
 
     await UserStepModel.findOneAndUpdate(
       { userId },
       {
         $set: {
-          step: "ask_manager_info",
+          step: 'ask_manager_info',
           data: {
             ...userActions?.data,
-            contractDate: contractDate,
-          },
-        },
+            contractDate: contractDate
+          }
+        }
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
   }
 
-  if (userActions?.step === "ask_manager_info") {
+  if (userActions?.step === 'ask_manager_info') {
     const managerInfo = ctx.message.text;
 
-    if (typeof managerInfo !== "string") {
+    if (typeof managerInfo !== 'string') {
       await ctx.reply(
-        userActions?.data?.language === "uz"
-          ? "Tavsif noto‘g‘ri formatda. Iltimos, matn kiriting."
-          : "Описание в неверном формате. Пожалуйста, введите текст.",
+        userActions?.data?.language === 'uz'
+          ? 'Tavsif noto‘g‘ri formatda. Iltimos, matn kiriting.'
+          : 'Описание в неверном формате. Пожалуйста, введите текст.'
       );
       return;
     }
 
     await ctx.reply(
-      userActions?.data.language === "uz"
-        ? "Izoh kiriting :"
-        : "Введите описание :",
+      userActions?.data.language === 'uz'
+        ? 'Izoh kiriting :'
+        : 'Введите описание :'
     );
 
     await UserStepModel.findOneAndUpdate(
       { userId },
       {
         $set: {
-          step: "ask_contract_description",
+          step: 'ask_contract_description',
           data: {
             ...userActions?.data,
-            managerInfo: managerInfo,
-          },
-        },
+            info: managerInfo
+          }
+        }
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
   }
 
-  if (userActions?.step === "ask_contract_description") {
+  if (userActions?.step === 'ask_contract_description') {
     const description = ctx?.message?.text;
 
-    if (typeof description !== "string") {
+    if (typeof description !== 'string') {
       await ctx.reply(
-        userActions?.data?.language === "uz"
-          ? "Tavsif noto‘g‘ri formatda. Iltimos, matn kiriting."
-          : "Описание в неверном формате. Пожалуйста, введите текст.",
+        userActions?.data?.language === 'uz'
+          ? 'Tavsif noto‘g‘ri formatda. Iltimos, matn kiriting.'
+          : 'Описание в неверном формате. Пожалуйста, введите текст.'
       );
       return;
     }
@@ -191,24 +194,24 @@ bot.on("message:text", async (ctx) => {
       { userId },
       {
         $set: {
-          step: "ask_contract_confirmation",
+          step: 'ask_contract_confirmation',
           data: {
             ...userActions?.data,
-            description: description,
-          },
-        },
+            description: description
+          }
+        }
       },
-      { upsert: true, new: true },
+      { upsert: true, new: true }
     );
   }
 
-  if (userActions?.step === "ask_contract_confirmation") {
+  if (userActions?.step === 'ask_contract_confirmation') {
     let uniqueId: number;
 
     const [contractsCount, latestContract, exchangeRate] = await Promise.all([
       ContractModel.countDocuments(),
       ContractModel.findOne().sort({ createdAt: -1 }),
-      getCurrency(),
+      getCurrency()
     ]);
 
     if (!contractsCount || !latestContract) {
@@ -217,18 +220,31 @@ bot.on("message:text", async (ctx) => {
       uniqueId = latestContract.uniqueId + 1;
     }
 
+    await UserStepModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          data: {
+            ...userActions?.data,
+            uniqueId: uniqueId
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+
     const confirmKeyboard = new InlineKeyboard()
       .text(
-        userActions.data.language === "uz" ? "✅ Tasdiqlash" : "✅ Подтвердить",
-        `confirm_contract_request:${userActions.data.contractId}`,
+        userActions.data.language === 'uz' ? '✅ Tasdiqlash' : '✅ Подтвердить',
+        `confirm_contract_request:${userActions.data.contractId}`
       )
       .text(
-        userActions.data.language === "uz" ? "❌ Bekor qilish" : "❌ Отменить",
-        `cancel_contract_request:${userActions.data.contractId}`,
+        userActions.data.language === 'uz' ? '❌ Bekor qilish' : '❌ Отменить',
+        `cancel_contract_request:${userActions.data.contractId}`
       );
 
     await ctx.reply(
-      userActions.data.language === "uz"
+      userActions.data.language === 'uz'
         ? `📋 Quyidagi ma'lumotlarni tasdiqlang:\n  
 🆔 Unikal ID: ${uniqueId}
 📄 Shartnoma ID: ${userActions.data.contractId}
@@ -236,7 +252,7 @@ bot.on("message:text", async (ctx) => {
 💱 Valyuta: ${userActions.data.currency}
 🔁 Ayirboshlash kursi: ${exchangeRate}
 📅 Shartnoma sanasi: ${userActions.data.contractDate}
-👤 Manager haqida ma'lumot: ${userActions.data.managerInfo}
+👤 Manager haqida ma'lumot: ${userActions.data.info}
 📝 Tavsif: ${userActions.data.description}
 
 Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
@@ -247,13 +263,13 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
 💱 Валюта: ${userActions.data.currency}
 🔁 Курс обмена: ${exchangeRate}
 📅 Дата контракта: ${userActions.data.contractDate}
-👤 Информация о менеджере: ${userActions.data.managerInfo}
+👤 Информация о менеджере: ${userActions.data.info}
 📝 Описание: ${userActions.data.description}
 
 Пожалуйста, подтвердите правильность данных.`,
       {
-        reply_markup: confirmKeyboard,
-      },
+        reply_markup: confirmKeyboard
+      }
     );
   }
 });
