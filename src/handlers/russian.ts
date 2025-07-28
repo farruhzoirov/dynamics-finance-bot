@@ -8,6 +8,7 @@ export async function handleRussianLang(ctx: MyContext) {
   if (findUserAction && !findUserAction?.data?.language) {
     findUserAction.data.language = 'ru';
     findUserAction.step = 'lang';
+    findUserAction.markModified('data');
     await findUserAction.save();
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup();

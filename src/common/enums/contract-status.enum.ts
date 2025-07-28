@@ -1,6 +1,6 @@
 export enum ContractStatuses {
   SENT = 'sent',
-  ACCEPTED = 'accepted',
+  APPROVED = 'approved',
   IN_PROGRESS = 'in_progress',
   CANCELLED = 'cancelled'
 }

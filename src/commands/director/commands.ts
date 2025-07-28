@@ -12,6 +12,7 @@ import {
   handleExpenseCurrency
 } from '../../handlers/director/expense';
 import { getBalanceHandler } from '../../handlers/balance';
+import { handleInProgressContractConfirmation } from '../../handlers/director/in-progress.contract';
 
 // For income
 bot.callbackQuery('add_income', handleIncomeConversation);
@@ -28,6 +29,15 @@ bot.callbackQuery(
   ['expense_confirm_yes', 'expense_confirm_no'],
   handleExpenseConfirmation
 );
+
+bot.callbackQuery(
+  /^director_in_progress:(.+)$/,
+  handleInProgressContractConfirmation
+);
+
+bot.callbackQuery(/^director_approve:(.+)$/, async (ctx) => {});
+
+bot.callbackQuery(/^director_reject:(.+)$/, async (ctx) => {});
 
 bot.callbackQuery('balance', getBalanceHandler);
 bot.callbackQuery('contracts_director');

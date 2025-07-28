@@ -6,13 +6,19 @@ import { getCurrency } from '../../helpers/get-currency';
 import { ContractModel } from '../../models/contract.model';
 import { UserStepModel } from '../../models/user-step.model';
 import { isValidDateFormat } from '../../validators/date.validator';
-import { handleContractRequestConfirmation } from '../../handlers/manager/confirm-contract';
+import { handleContractRequestConfirmation } from '../../handlers/manager/confirm-contract-request';
+import { handleContractRequestCancellation } from '../../handlers/manager/cancel-contract-request';
 
 bot.callbackQuery('create_contract', handleContractCreation);
 bot.callbackQuery(['contract_usd', 'contract_uzs'], handleContractCurreny);
 bot.callbackQuery(
   /^confirm_contract_request:(.+)$/,
   handleContractRequestConfirmation
+);
+
+bot.callbackQuery(
+  /^cancel_contract_request:(.+)$/,
+  handleContractRequestCancellation
 );
 
 bot.on('message:text', async (ctx) => {
@@ -24,6 +30,19 @@ bot.on('message:text', async (ctx) => {
 
   if (userActions.step === 'ask_contract_id') {
     const contractId = parseInt(text);
+
+    const isExistsContract = await ContractModel.findOne({
+      contractId: contractId
+    });
+
+    if (isExistsContract) {
+      await ctx.reply(
+        userActions?.data.language === 'uz'
+          ? '❌ Bunday raqamli shartnoma allaqachon mavjud.'
+          : '❌ Договор с данным номером уже существует.'
+      );
+      return;
+    }
 
     if (isNaN(contractId)) {
       await ctx.reply(
@@ -220,7 +239,7 @@ bot.on('message:text', async (ctx) => {
       uniqueId = latestContract.uniqueId + 1;
     }
 
-    await UserStepModel.findOneAndUpdate(
+    userActions = await UserStepModel.findOneAndUpdate(
       { userId },
       {
         $set: {
@@ -233,6 +252,8 @@ bot.on('message:text', async (ctx) => {
       { upsert: true, new: true }
     );
 
+    if (!userActions) return;
+
     const confirmKeyboard = new InlineKeyboard()
       .text(
         userActions.data.language === 'uz' ? '✅ Tasdiqlash' : '✅ Подтвердить',
@@ -243,11 +264,11 @@ bot.on('message:text', async (ctx) => {
         `cancel_contract_request:${userActions.data.contractId}`
       );
 
-    await ctx.reply(
+    const confirmationMessage = await ctx.reply(
       userActions.data.language === 'uz'
         ? `📋 Quyidagi ma'lumotlarni tasdiqlang:\n  
 🆔 Unikal ID: ${uniqueId}
-📄 Shartnoma ID: ${userActions.data.contractId}
+📄 Shartnoma raqami: ${userActions.data.contractId}
 💰 Shartnoma summasi: ${userActions.data.contractAmount}
 💱 Valyuta: ${userActions.data.currency}
 🔁 Ayirboshlash kursi: ${exchangeRate}
@@ -258,11 +279,11 @@ bot.on('message:text', async (ctx) => {
 Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
         : `📋 Пожалуйста, подтвердите следующие данные:\n
 🆔 Уникальный ID: ${uniqueId}
-📄 ID контракта: ${userActions.data.contractId}
-💰 Сумма контракта: ${userActions.data.contractAmount}
+📄 Номер договора: ${userActions.data.contractId}
+💰 Сумма договора: ${userActions.data.contractAmount}
 💱 Валюта: ${userActions.data.currency}
 🔁 Курс обмена: ${exchangeRate}
-📅 Дата контракта: ${userActions.data.contractDate}
+📅 Дата договора: ${userActions.data.contractDate}
 👤 Информация о менеджере: ${userActions.data.info}
 📝 Описание: ${userActions.data.description}
 
@@ -270,6 +291,19 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
       {
         reply_markup: confirmKeyboard
       }
+    );
+
+    await UserStepModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          data: {
+            ...userActions?.data,
+            managerConfirmationMessageId: confirmationMessage.message_id
+          }
+        }
+      },
+      { upsert: true, new: true }
     );
   }
 });
