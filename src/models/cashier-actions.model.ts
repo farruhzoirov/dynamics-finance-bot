@@ -1,23 +1,20 @@
 import { Schema, model } from 'mongoose';
 import { ContractStatuses } from '../common/enums/contract-status.enum';
 
-const DirectorActionSchema = new Schema(
+const CashierActionSchema = new Schema(
   {
     contractId: { type: Number },
     messageId: { type: Number },
     action: { type: String, enum: ContractStatuses },
     actionDate: { type: String },
-    directorId: { type: Number },
-    directorName: { type: String }
+    cashierId: { type: Number },
+    cashierName: { type: String }
   },
   {
     timestamps: true
   }
 );
 
-export const DirectorActionModel = model(
-  'directoraction',
-  DirectorActionSchema
-);
+export const CashierActionModel = model('cashieraction', CashierActionSchema);
 
-DirectorActionSchema.index({ directorId: 1 });
+CashierActionSchema.index({ cashierId: 1 });

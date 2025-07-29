@@ -1,5 +1,6 @@
 import { MyContext } from '../../bot';
 import { ContractStatuses } from '../../common/enums/contract-status.enum';
+import { CashierActionModel } from '../../models/cashier-actions.model';
 import { ContractModel } from '../../models/contract.model';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { UserStepModel } from '../../models/user-step.model';
@@ -8,19 +9,27 @@ export async function handleContractRejection(ctx: MyContext) {
   try {
     if (!ctx.match) return;
     const contractId = ctx.match[1];
-    const [findContract, findDirectorActions, findUserActions] =
-      await Promise.all([
-        ContractModel.findOne({
-          contractId: contractId
-        }),
-        DirectorActionModel.findOne({ contractId: contractId }),
-        UserStepModel.findOne({ userId: ctx?.from?.id })
-      ]);
+    const [
+      findContract,
+      findDirectorActions,
+      findCashierActions,
+      findUserActions
+    ] = await Promise.all([
+      ContractModel.findOne({
+        contractId: contractId
+      }),
+      DirectorActionModel.findOne({ contractId: contractId }),
+      CashierActionModel.findOne({ contractId: contractId }),
+      UserStepModel.findOne({ userId: ctx?.from?.id })
+    ]);
 
     await ctx.answerCallbackQuery();
 
     if (!findContract) return await ctx.reply("Contract doesn't exist");
-
+    if (!findDirectorActions)
+      return await ctx.reply("Director Actions doesn't exist");
+    if (!findCashierActions)
+      return await ctx.reply("Cashier Actions doesn't exist");
     const findManagerActions = await UserStepModel.findOne({
       userId: findContract?.managerUserId
     });
@@ -28,18 +37,24 @@ export async function handleContractRejection(ctx: MyContext) {
     if (!findManagerActions) return await ctx.reply("Manager doesn't exist");
     let statusSection = '';
 
-    if (findDirectorActions) {
+    if (findDirectorActions && findCashierActions) {
       const actionDate = new Date().toLocaleString();
-      const statusEmoji = '❌';
+      const statusEmoji = '✅';
       const statusText =
+        findManagerActions.data.language === 'uz'
+          ? 'Direktor tasdiqlagan'
+          : 'Директор одобрил';
+
+      const cashierStatusEmoji = '❌';
+      const cashierStatusText =
         findManagerActions.data.language === 'uz'
           ? 'Bekor qilindi.'
           : 'Отменено.';
 
       statusSection =
         findManagerActions.data.language === 'uz'
-          ? `🔔 *Director harakati:*\n${statusEmoji} *Status:* ${statusText}\n📅 *Vaqt:* ${actionDate}\n👤 *Director:* ${findDirectorActions.directorName || 'Director'}`
-          : `🔔 *Действие директора:*\n${statusEmoji} *Статус:* ${statusText}\n📅 *Время:* ${actionDate}\n👤 *Директор:* ${findDirectorActions.directorName || 'Director'}`;
+          ? `🔔 *Director harakati:*\n${statusEmoji} *Status:* ${statusText}\n📅 *Vaqt:* ${findDirectorActions?.actionDate || "Noma'lum"}\n👤 *Director:* ${findDirectorActions?.directorName || 'Director'}\n\n🔔 *Kassir harakati:*\n${cashierStatusEmoji} *Status:* ${cashierStatusText}\n📅 *Vaqt:* ${actionDate}\n 👤 *Kassir:* ${findCashierActions?.cashierName || 'Cashier'} `
+          : `🔔 *Действие директора:*\n${statusEmoji} *Статус:* ${statusText}\n📅 *Время:* ${findDirectorActions?.actionDate || 'Неизвестно'}\n👤 *Директор:* ${findDirectorActions?.directorName || 'Director'}\n\n🔔 *Действие кассира:*\n${cashierStatusEmoji} *Статус:* ${cashierStatusText}\n📅 *Время:* ${actionDate}\n 👤 *Кассир:* ${findCashierActions?.cashierName || 'Cashier'}`;
     }
 
     const updatedText =
@@ -81,8 +96,8 @@ export async function handleContractRejection(ctx: MyContext) {
 
     await ctx.reply(
       findUserActions?.data.language === 'uz'
-        ? "✅ O'zgarish managerga yuborildi."
-        : '✅ Изменение отправлено менеджеру'
+        ? "Bekor qilindi. ✅ O'zgarish managerga yuborildi."
+        : 'Отменено. ✅ Изменение отправлено менеджеру'
     );
 
     const confirmationText =
@@ -107,7 +122,7 @@ export async function handleContractRejection(ctx: MyContext) {
     );
     await ctx.editMessageReplyMarkup(undefined);
   } catch (err) {
-    console.error('Error in RejectContract: Director', err);
-    await ctx.reply('Error in RejectContract: Director');
+    console.error('Error in RejectContract: Cashier', err);
+    await ctx.reply('Error in RejectContract: Cashier');
   }
 }
