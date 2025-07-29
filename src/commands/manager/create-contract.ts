@@ -266,30 +266,31 @@ bot.on('message:text', async (ctx) => {
 
     const confirmationMessage = await ctx.reply(
       userActions.data.language === 'uz'
-        ? `📋 Quyidagi ma'lumotlarni tasdiqlang:\n  
-🆔 Unikal ID: ${uniqueId}
-📄 Shartnoma raqami: ${userActions.data.contractId}
-💰 Shartnoma summasi: ${userActions.data.contractAmount}
-💱 Valyuta: ${userActions.data.currency}
-🔁 Ayirboshlash kursi: ${exchangeRate}
-📅 Shartnoma sanasi: ${userActions.data.contractDate}
-👤 Manager haqida ma'lumot: ${userActions.data.info}
-📝 Tavsif: ${userActions.data.description}
+        ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n  
+*🆔 Unikal ID:* ${uniqueId}
+*📄 Shartnoma raqami:* ${userActions.data.contractId}
+*💰 Shartnoma summasi:* ${userActions.data.contractAmount}
+*💱 Valyuta:* ${userActions.data.currency}
+*🔁 Ayirboshlash kursi:* ${exchangeRate}
+*📅 Shartnoma sanasi:* ${userActions.data.contractDate}
+*👤 Manager haqida ma'lumot:* ${userActions.data.info}
+*📝 Tavsif:* ${userActions.data.description}
 
 Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
-        : `📋 Пожалуйста, подтвердите следующие данные:\n
-🆔 Уникальный ID: ${uniqueId}
-📄 Номер договора: ${userActions.data.contractId}
-💰 Сумма договора: ${userActions.data.contractAmount}
-💱 Валюта: ${userActions.data.currency}
-🔁 Курс обмена: ${exchangeRate}
-📅 Дата договора: ${userActions.data.contractDate}
-👤 Информация о менеджере: ${userActions.data.info}
-📝 Описание: ${userActions.data.description}
+        : `📋 *Пожалуйста, подтвердите следующие данные:*\n
+*🆔 Уникальный ID:* ${uniqueId}
+*📄 Номер договора:* ${userActions.data.contractId}
+*💰 Сумма договора:* ${userActions.data.contractAmount}
+*💱 Валюта:* ${userActions.data.currency}
+*🔁 Курс обмена:* ${exchangeRate}
+*📅 Дата договора:* ${userActions.data.contractDate}
+*👤 Информация о менеджере:* ${userActions.data.info}
+*📝 Описание:* ${userActions.data.description}
 
 Пожалуйста, подтвердите правильность данных.`,
       {
-        reply_markup: confirmKeyboard
+        reply_markup: confirmKeyboard,
+        parse_mode: 'Markdown'
       }
     );
 
@@ -303,7 +304,7 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
           }
         }
       },
-      { upsert: true, new: true }
+      { upsert: true }
     );
   }
 });

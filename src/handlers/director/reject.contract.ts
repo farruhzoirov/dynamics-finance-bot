@@ -4,10 +4,7 @@ import { ContractModel } from '../../models/contract.model';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { UserStepModel } from '../../models/user-step.model';
 
-// Director Actions are contract based actions actually.
-// User Actions are actions that interact with bot .
-
-export async function handleInProgressContractConfirmation(ctx: MyContext) {
+export async function handleContractRejection(ctx: MyContext) {
   if (!ctx.match) return;
   const contractId = ctx.match[1];
   const [findContract, findDirectorActions, findUserActions] =
@@ -30,11 +27,9 @@ export async function handleInProgressContractConfirmation(ctx: MyContext) {
 
   if (findDirectorActions) {
     const actionDate = new Date().toLocaleString();
-    const statusEmoji = '👀';
+    const statusEmoji = '❌';
     const statusText =
-      findManagerActions.data.language === 'uz'
-        ? "Ko'rib chiqilmoqda"
-        : 'В процессе';
+      findManagerActions.data.language === 'uz' ? 'Bekor qilindi' : 'Отменено';
 
     statusSection =
       findManagerActions.data.language === 'uz'
@@ -45,30 +40,30 @@ export async function handleInProgressContractConfirmation(ctx: MyContext) {
   const updatedText =
     findManagerActions.data.language === 'uz'
       ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n
-🆔 *Unikal ID:* ${findContract.uniqueId}
-📄 *Shartnoma ID:* ${findContract.contractId}
-💰 *Shartnoma summasi:* ${findContract.contractAmount}
-💱 *Valyuta:* ${findContract.currency}
-🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}
-📅 *Shartnoma sanasi:* ${findContract.contractDate}
-👤 *Manager haqida ma'lumot:* ${findContract.info}
-📝 *Tavsif:* ${findContract.description}
-
-${statusSection}
-
-`
+  🆔 *Unikal ID:* ${findContract.uniqueId}
+  📄 *Shartnoma ID:* ${findContract.contractId}
+  💰 *Shartnoma summasi:* ${findContract.contractAmount}
+  💱 *Valyuta:* ${findContract.currency}
+  🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}
+  📅 *Shartnoma sanasi:* ${findContract.contractDate}
+  👤 *Manager haqida ma'lumot:* ${findContract.info}
+  📝 *Tavsif:* ${findContract.description}
+  
+  ${statusSection}
+  
+  `
       : `📋 *Пожалуйста, подтвердите следующие данные:*\n
-🆔 *Уникальный ID:* ${findContract.uniqueId}
-📄 *ID контракта:* ${findContract.contractId}
-💰 *Сумма контракта:* ${findContract.contractAmount}
-💱 *Валюта:* ${findContract.currency}
-🔁 *Курс обмена:* ${findContract.exchangeRate}
-📅 *Дата контракта:* ${findContract.contractDate}
-👤 *Информация о менеджере:* ${findContract.info}
-📝 *Описание:* ${findContract.description}
-
-${statusSection}
-`;
+  🆔 *Уникальный ID:* ${findContract.uniqueId}
+  📄 *ID контракта:* ${findContract.contractId}
+  💰 *Сумма контракта:* ${findContract.contractAmount}
+  💱 *Валюта:* ${findContract.currency}
+  🔁 *Курс обмена:* ${findContract.exchangeRate}
+  📅 *Дата контракта:* ${findContract.contractDate}
+  👤 *Информация о менеджере:* ${findContract.info}
+  📝 *Описание:* ${findContract.description}
+  
+  ${statusSection}
+  `;
 
   await ctx.api.editMessageText(
     findContract!.managerUserId!.toString(),
@@ -101,7 +96,7 @@ ${statusSection}
     { contractId: findContract.contractId },
     {
       $set: {
-        status: ContractStatuses.IN_PROGRESS
+        status: ContractStatuses.CANCELLED
       }
     }
   );

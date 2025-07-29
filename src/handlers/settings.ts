@@ -40,8 +40,7 @@ export async function changeLanguageHandler(ctx: MyContext) {
   } else {
     findUserActions.data.language = 'uz';
   }
-  console.log(findUserActions);
-  findUserActions.markModified('data'); // <-- MUHIM!
+  findUserActions.markModified('data');
   await findUserActions.save();
 
   //   await ctx.answerCallbackQuery();
