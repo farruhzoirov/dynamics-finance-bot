@@ -3,7 +3,8 @@ import { ContractStatuses } from '../common/enums/contract-status.enum';
 
 const DirectorActionSchema = new Schema(
   {
-    contractId: { type: Number },
+    contractId: { type: Number, default: null },
+    expenseTypeId: { type: Number, default: null },
     messageId: { type: Number },
     action: { type: String, enum: ContractStatuses },
     actionDate: { type: String },
@@ -19,5 +20,6 @@ export const DirectorActionModel = model(
   'directoraction',
   DirectorActionSchema
 );
-
 DirectorActionSchema.index({ directorId: 1 });
+DirectorActionSchema.index({ contractId: 1 });
+DirectorActionSchema.index({ expenseTypeId: 1 });

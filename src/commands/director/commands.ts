@@ -14,4 +14,5 @@ bot.callbackQuery(/^director_approve:(.+)$/, handleContractApproval);
 bot.callbackQuery(/^director_reject:(.+)$/, handleContractRejection);
 
 bot.callbackQuery('balance', getBalanceHandler);
+
 bot.callbackQuery('contracts_director');

@@ -29,13 +29,16 @@ export async function handleContractRejection(ctx: MyContext) {
     if (!findContract) return await ctx.reply("Contract doesn't exist");
     if (!findDirectorActions)
       return await ctx.reply("Director Actions doesn't exist");
+
     if (!findCashierActions)
       return await ctx.reply("Cashier Actions doesn't exist");
+
     const findManagerActions = await UserStepModel.findOne({
       userId: findContract?.managerUserId
     });
 
     if (!findManagerActions) return await ctx.reply("Manager doesn't exist");
+
     let statusSection = '';
 
     if (findDirectorActions && findCashierActions) {

@@ -86,3 +86,32 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
     .row();
   return keyboard;
 }
+
+export function getForContractExpenseKeyboardForManager(userActions: any) {
+  const isUz = userActions.data.language === 'uz';
+
+  const keyboard = new InlineKeyboard()
+    .text(
+      isUz ? '🛒 Tovar xaridi uchun' : '🛒 Для покупки товара',
+      'expense_purchase'
+    )
+    .text(
+      isUz ? '🚚 Tovar logistikasi' : '🚚 Логистика товара',
+      'expense_logistics'
+    )
+    .row()
+    .text(isUz ? '📄 Sertifikatlar' : '📄 Сертификаты', 'expense_certificates')
+    .text(isUz ? '📦 Boshqa xarajatlar' : '📦 Прочие расходы', 'expense_other')
+    .row()
+    .text(
+      isUz ? '🎁 Mijoz uchun bonus' : '🎁 Бонус для клиента',
+      'expense_bonus'
+    )
+    .text(
+      isUz ? '🤝 Meneger ulushi' : '🤝 Доля менеджера',
+      'expense_manager_share'
+    )
+    .row();
+
+  return keyboard;
+}
