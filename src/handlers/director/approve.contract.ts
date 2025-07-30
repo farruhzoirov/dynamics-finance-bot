@@ -6,6 +6,7 @@ import { DirectorActionModel } from '../../models/director-actions.model';
 import { UserStepModel } from '../../models/user-step.model';
 import { UserModel } from '../../models/user.model';
 import { CashierActionModel } from '../../models/cashier-actions.model';
+import { formatAmountByCurrency } from '../../helpers/format-amount';
 
 export async function handleContractApproval(ctx: MyContext) {
   try {
@@ -60,8 +61,8 @@ export async function handleContractApproval(ctx: MyContext) {
       findManagerActions.data.language === 'uz'
         ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n` +
           `🆔 *Unikal ID:* ${findContract.uniqueId}\n` +
-          `📄 *Shartnoma ID:* ${findContract.contractId}\n` +
-          `💰 *Shartnoma summasi:* ${findContract.contractAmount}\n` +
+          `📄 *Shartnoma raqami:* ${findContract.contractId}\n` +
+          `💰 *Shartnoma summasi:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}\n` +
           `💱 *Valyuta:* ${findContract.currency}\n` +
           `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
           `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
@@ -70,11 +71,11 @@ export async function handleContractApproval(ctx: MyContext) {
           `${statusSection}`
         : `📋 *Пожалуйста, подтвердите следующие данные:*\n` +
           `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
-          `📄 *ID контракта:* ${findContract.contractId}\n` +
-          `💰 *Сумма контракта:* ${findContract.contractAmount}\n` +
+          `📄 *Номер договора:* ${findContract.contractId}\n` +
+          `💰 *Сумма договора:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}\n` +
           `💱 *Валюта:* ${findContract.currency}\n` +
           `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
-          `📅 *Дата контракта:* ${findContract.contractDate}\n` +
+          `📅 *Дата договора:* ${findContract.contractDate}\n` +
           `👤 *Информация о менеджере:* ${findContract.info}\n` +
           `📝 *Описание:* ${findContract.description}\n\n` +
           `${statusSection}`;
@@ -102,8 +103,8 @@ export async function handleContractApproval(ctx: MyContext) {
           cashierLang === 'uz'
             ? `📋 *Yangi tasdiqlangan shartnoma:*\n` +
               `🆔 *Unikal ID:* ${findContract.uniqueId}\n` +
-              `📄 *Shartnoma ID:* ${findContract.contractId}\n` +
-              `💰 *Shartnoma summasi:* ${findContract.contractAmount}\n` +
+              `📄 *Shartnoma raqami:* ${findContract.contractId}\n` +
+              `💰 *Shartnoma summasi:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}\n` +
               `💱 *Valyuta:* ${findContract.currency}\n` +
               `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
               `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
@@ -113,14 +114,14 @@ export async function handleContractApproval(ctx: MyContext) {
               `📅 *Tasdiqlangan vaqt:* ${actionDate}`
             : `📋 *Новый одобренный контракт:*\n` +
               `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
-              `📄 *ID контракта:* ${findContract.contractId}\n` +
-              `💰 *Сумма контракта:* ${findContract.contractAmount}\n` +
+              `📄 *Номер договора:* ${findContract.contractId}\n` +
+              `💰 *Сумма договора:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}\n` +
               `💱 *Валюта:* ${findContract.currency}\n` +
               `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
-              `📅 *Дата контракта:* ${findContract.contractDate}\n` +
+              `📅 *Дата договора:* ${findContract.contractDate}\n` +
               `👤 *Информация о менеджере:* ${findContract.info}\n` +
               `📝 *Описание:* ${findContract.description}\n\n` +
-              `✅ *Директор, одобривший контракт:* ${findDirectorActions?.directorName || 'Director'}\n` +
+              `✅ *Директор, одобривший договора:* ${findDirectorActions?.directorName || 'Director'}\n` +
               `📅 *Время одобрения:* ${actionDate}`;
 
         const cashierKeyboard = new InlineKeyboard()

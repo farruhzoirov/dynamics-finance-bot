@@ -3,7 +3,6 @@ import { TransactionType } from '../common/enums/transaction.enum';
 
 export async function getBalance(currency: string) {
   const result = await TransactionModel.aggregate([
-    // Match documents with the specified currency
     {
       $match: { currency: currency }
     },
@@ -13,7 +12,6 @@ export async function getBalance(currency: string) {
         totalAmount: { $sum: '$amount' }
       }
     },
-    // Group all results together and calculate totals for income and expense
     {
       $group: {
         _id: null,

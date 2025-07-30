@@ -8,6 +8,9 @@ import { UserStepModel } from '../../models/user-step.model';
 import { isValidDateFormat } from '../../validators/date.validator';
 import { handleContractRequestConfirmation } from '../../handlers/manager/confirm-contract-request';
 import { handleContractRequestCancellation } from '../../handlers/manager/cancel-contract-request';
+import { validateAndParseAmount } from '../../validators/amount.validator';
+import { validateContractId } from '../../validators/contract-id.validator';
+import { formatAmountByCurrency } from '../../helpers/format-amount';
 
 bot.callbackQuery('create_contract', handleContractCreation);
 bot.callbackQuery(['contract_usd', 'contract_uzs'], handleContractCurreny);
@@ -29,7 +32,15 @@ bot.on('message:text', async (ctx) => {
   if (!userActions) return;
 
   if (userActions.step === 'ask_contract_id') {
-    const contractId = parseInt(text);
+    const contractId = validateContractId(text);
+    if (!contractId) {
+      await ctx.reply(
+        userActions?.data.language === 'uz'
+          ? "❌ Iltimos, qiymatni faqat musbat sonlarda va to'g'ri formatda kiriting."
+          : '❌ Пожалуйста, вводите только положительные числа в правильном формате.'
+      );
+      return;
+    }
 
     const isExistsContract = await ContractModel.findOne({
       contractId: contractId
@@ -40,15 +51,6 @@ bot.on('message:text', async (ctx) => {
         userActions?.data.language === 'uz'
           ? '❌ Bunday raqamli shartnoma allaqachon mavjud.'
           : '❌ Договор с данным номером уже существует.'
-      );
-      return;
-    }
-
-    if (isNaN(contractId)) {
-      await ctx.reply(
-        userActions?.data.language === 'uz'
-          ? '❌ Iltimos, qiymatni faqat sonlarda kiriting.'
-          : '❌ Пожалуйста, введите значение только цифрами.'
       );
       return;
     }
@@ -75,14 +77,13 @@ bot.on('message:text', async (ctx) => {
   }
 
   if (userActions?.step === 'ask_contract_amount') {
-    const contractAmountText = ctx?.message?.text.replace(/[\s.,-]/g, '');
-    const contractAmount = parseInt(contractAmountText);
-
-    if (isNaN(contractAmount) || contractAmount < 0) {
+    const amountText = ctx!.message!.text!;
+    const contractAmount = validateAndParseAmount(amountText);
+    if (!contractAmount || contractAmount < 0) {
       await ctx.reply(
         userActions?.data.language === 'uz'
-          ? '❌ Iltimos, qiymatni faqat musbat sonlarda kiriting.'
-          : '❌ Пожалуйста, вводите только положительные числа.'
+          ? "❌ Iltimos, qiymatni faqat musbat sonlarda va to'g'ri formatda kiriting."
+          : '❌ Пожалуйста, вводите только положительные числа в правильном формате.'
       );
       return;
     }
@@ -269,7 +270,7 @@ bot.on('message:text', async (ctx) => {
         ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n  
 *🆔 Unikal ID:* ${uniqueId}
 *📄 Shartnoma raqami:* ${userActions.data.contractId}
-*💰 Shartnoma summasi:* ${userActions.data.contractAmount}
+*💰 Shartnoma summasi:* ${formatAmountByCurrency(userActions.data.contractAmount, userActions.data.currency, userActions.data.language)}
 *💱 Valyuta:* ${userActions.data.currency}
 *🔁 Ayirboshlash kursi:* ${exchangeRate}
 *📅 Shartnoma sanasi:* ${userActions.data.contractDate}
@@ -280,7 +281,7 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
         : `📋 *Пожалуйста, подтвердите следующие данные:*\n
 *🆔 Уникальный ID:* ${uniqueId}
 *📄 Номер договора:* ${userActions.data.contractId}
-*💰 Сумма договора:* ${userActions.data.contractAmount}
+*💰 Сумма договора:* ${formatAmountByCurrency(userActions.data.contractAmount, userActions.data.currency, userActions.data.language)}
 *💱 Валюта:* ${userActions.data.currency}
 *🔁 Курс обмена:* ${exchangeRate}
 *📅 Дата договора:* ${userActions.data.contractDate}

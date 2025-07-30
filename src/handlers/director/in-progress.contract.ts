@@ -1,5 +1,6 @@
 import { MyContext } from '../../bot';
 import { ContractStatuses } from '../../common/enums/contract-status.enum';
+import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { ContractModel } from '../../models/contract.model';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { UserStepModel } from '../../models/user-step.model';
@@ -46,8 +47,8 @@ export async function handleInProgressContractConfirmation(ctx: MyContext) {
     findManagerActions.data.language === 'uz'
       ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n
 🆔 *Unikal ID:* ${findContract.uniqueId}
-📄 *Shartnoma ID:* ${findContract.contractId}
-💰 *Shartnoma summasi:* ${findContract.contractAmount}
+📄 *Shartnoma raqami:* ${findContract.contractId}
+💰 *Shartnoma summasi:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}
 💱 *Valyuta:* ${findContract.currency}
 🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}
 📅 *Shartnoma sanasi:* ${findContract.contractDate}
@@ -59,11 +60,11 @@ ${statusSection}
 `
       : `📋 *Пожалуйста, подтвердите следующие данные:*\n
 🆔 *Уникальный ID:* ${findContract.uniqueId}
-📄 *ID контракта:* ${findContract.contractId}
-💰 *Сумма контракта:* ${findContract.contractAmount}
+📄 *Номер договора:* ${findContract.contractId}
+💰 *Сумма договора:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}
 💱 *Валюта:* ${findContract.currency}
 🔁 *Курс обмена:* ${findContract.exchangeRate}
-📅 *Дата контракта:* ${findContract.contractDate}
+📅 *Дата договора:* ${findContract.contractDate}
 👤 *Информация о менеджере:* ${findContract.info}
 📝 *Описание:* ${findContract.description}
 

@@ -6,7 +6,6 @@ import { getCurrency } from '../../helpers/get-currency';
 import { ContractModel } from '../../models/contract.model';
 import { ContractStatuses } from '../../common/enums/contract-status.enum';
 import { DirectorActionModel } from '../../models/director-actions.model';
-import { IContract } from '../../common/interfaces/contract';
 import { RemainingContractFields } from '../../common/types/contract';
 
 export async function handleContractRequestConfirmation(ctx: MyContext) {

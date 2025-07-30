@@ -1,20 +1,17 @@
-import { MyContext } from '../../bot';
-import { UserModel } from '../../models/user.model';
-import { UserStepModel } from '../../models/user-step.model';
-import { TransactionType } from '../../common/enums/transaction.enum';
-import { getCurrency } from '../../helpers/get-currency';
-import { TransactionModel } from '../../models/transaction.model';
-import { getBalance } from '../../helpers/get-balance';
-import { Currency } from '../../common/enums/currency.enum';
+import { MyContext } from '../bot';
+import { UserModel } from '../models/user.model';
+import { UserStepModel } from '../models/user-step.model';
+import { getCurrency } from '../helpers/get-currency';
+import { TransactionModel } from '../models/transaction.model';
 
-export async function handleExpense(ctx: MyContext) {
+export async function handleIncomeConversation(ctx: MyContext) {
+  // Steps -  ask_amount, ask_currency, ask_description,
   await ctx.answerCallbackQuery();
   const userId = ctx?.from?.id;
   let [user, userActions] = await Promise.all([
     UserModel.findOne({ userId: userId }),
     UserStepModel.findOne({ userId: userId })
   ]);
-
   await UserModel.updateOne(
     { userId },
     {
@@ -33,10 +30,10 @@ export async function handleExpense(ctx: MyContext) {
       { userId },
       {
         $set: {
-          step: 'ask_amount_expense',
+          step: 'ask_amount_income',
           data: {
             ...userActions?.data,
-            type: TransactionType.expense
+            type: 'income'
           }
         }
       },
@@ -44,13 +41,13 @@ export async function handleExpense(ctx: MyContext) {
     );
     return await ctx.reply(
       userActions?.data?.language === 'uz'
-        ? 'Iltimos, chiqim miqdorini kiriting:'
-        : 'Пожалуйста, Введите сумму вывода::'
+        ? 'Iltimos, kirim miqdorini kiriting:'
+        : 'Пожалуйста, введите сумму дохода:'
     );
   }
 }
 
-export async function handleExpenseCurrency(ctx: MyContext) {
+export async function handleIncomeCurrency(ctx: MyContext) {
   await ctx.answerCallbackQuery();
   const userId = ctx!.from!.id;
   const message = ctx!.callbackQuery!.message;
@@ -70,7 +67,7 @@ export async function handleExpenseCurrency(ctx: MyContext) {
       { userId },
       {
         $set: {
-          step: 'ask_description_expense',
+          step: 'ask_description_income',
           data: {
             ...userActions?.data,
             currency: currency
@@ -87,7 +84,7 @@ export async function handleExpenseCurrency(ctx: MyContext) {
   }
 }
 
-export async function handleExpenseConfirmation(ctx: MyContext) {
+export async function handleIncomeConfirmation(ctx: MyContext) {
   await ctx.answerCallbackQuery();
   const userId = ctx!.from!.id;
   const answer = ctx!.callbackQuery!.data?.split('_')[2];
@@ -120,43 +117,7 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
       await ctx.reply('Error: Exchange rate is 0');
       return;
     }
-
     const user = await UserModel.findOne({ userId: userId });
-
-    const balance = await getBalance(
-      userActions.data.currency === Currency.USD ? Currency.USD : Currency.UZS
-    );
-    console.log('Balance', balance);
-    if (balance.balance < amount) {
-      const difference = amount - balance.balance;
-      if (userActions.data.currency === Currency.USD) {
-        const convertToSum = difference * exchangeRate;
-        const balanceInSum = await getBalance(Currency.UZS);
-        if (balanceInSum.balance < convertToSum) {
-          await ctx.reply(
-            userActions.data.language === 'uz'
-              ? "Sizning balansingizda yetarli mablag' yo'q."
-              : 'Недостаточно средств на вашем балансе.'
-          );
-          return;
-        }
-      }
-      if (userActions.data.currency === Currency.UZS) {
-        const convertToUSD = difference / exchangeRate;
-        console.log(convertToUSD);
-
-        const balanceInUSD = await getBalance(Currency.USD);
-        if (balanceInUSD.balance < convertToUSD) {
-          await ctx.reply(
-            userActions.data.language === 'uz'
-              ? "Sizning balansingizda yetarli mablag' yo'q."
-              : 'Недостаточно средств на вашем балансе.'
-          );
-          return;
-        }
-      }
-    }
-
     await Promise.all([
       TransactionModel.create({
         type: type,

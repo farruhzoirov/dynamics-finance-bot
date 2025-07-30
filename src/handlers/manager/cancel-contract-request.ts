@@ -23,8 +23,11 @@ export async function handleContractRequestCancellation(ctx: MyContext) {
     await ctx.answerCallbackQuery();
     await ctx.editMessageReplyMarkup(undefined);
     await ctx.reply(
-      userActions?.data.lang === 'uz' ? '❌ Bekor qilindi' : '❌ Отменено'
+      userActions?.data.language === 'uz' ? '❌ Bekor qilindi' : '❌ Отменено'
     );
+    userActions.step === 'main_menu';
+    userActions.markModified('step');
+    await userActions.save();
   } catch (err) {
     console.error('❌ Error in handleContractRequestConfirmation:', err);
     await ctx.reply('❌ Xatolik yuz berdi. Iltimos, keyinroq urinib ko‘ring.');

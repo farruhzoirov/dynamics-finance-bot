@@ -10,7 +10,8 @@ const AUTHORIZED_USERS = {
   830735800: UserRoles.manager,
   689888057: UserRoles.manager,
   106295438: UserRoles.manager,
-  1258718142: UserRoles.cashier
+  1258718142: UserRoles.cashier,
+  7781258426: UserRoles.cashier
 } as const;
 
 export async function authMiddleware(ctx: Context, next: NextFunction) {
