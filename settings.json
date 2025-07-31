@@ -25,5 +25,9 @@
   "prettier.semi": false,
   "prettier.trailingComma": "all",
   "prettier.tabWidth": 2,
-  "prettier.printWidth": 100
+  "prettier.printWidth": 100,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.organizeImports": true
+  }
 }

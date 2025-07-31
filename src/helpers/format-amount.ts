@@ -12,7 +12,8 @@ export function formatAmountByCurrency(
     [`${Currency.UZS}_ru`]: { locale: 'ru-RU', currency: 'UZS' }
   };
 
-  const key = `${currencyType}_${language}`;
+  const key = `${currencyType}_${language || 'ru'}`;
+  console.log(key);
   const config = map[key];
 
   if (!config) {

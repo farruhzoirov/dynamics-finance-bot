@@ -1,19 +1,89 @@
 import { MyContext } from '../../bot';
+import { Expenses } from '../../common/enums/expense-type.enum';
+import { TransactionType } from '../../common/enums/transaction.enum';
+import { getCurrency } from '../../helpers/get-currency';
+import { TransactionModel } from '../../models/transaction.model';
+import { UserStepModel } from '../../models/user-step.model';
+import { UserModel } from '../../models/user.model';
 
 export async function handleCommonExpensesRequest(ctx: MyContext) {
   const expenseType = ctx.callbackQuery?.data;
+  const userId = ctx.from?.id;
+  const userActions = await UserStepModel.findOne({ userId: userId });
+  if (!userActions) return;
 
-  switch (expenseType) {
-    case 'office':
-      break;
-    case 'share':
-      console.log('office');
-      break;
-    case 'advance':
-      console.log('office');
-      break;
-    case 'income':
-      console.log('office');
-      break;
+  await UserModel.updateOne(
+    { userId },
+    {
+      $setOnInsert: {
+        userId,
+        userName: ctx?.from?.username,
+        userFirstName: ctx?.from?.first_name,
+        userLastName: ctx?.from?.last_name
+      }
+    },
+    { upsert: true }
+  );
+
+  await ctx.answerCallbackQuery();
+
+  if ((Object.values(Expenses) as string[]).includes(expenseType as string)) {
+    await UserStepModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          step: 'ask_common_expense_amount',
+          data: {
+            ...userActions?.data,
+            type: TransactionType.expense,
+            expenseType: expenseType
+          }
+        }
+      },
+      { upsert: true }
+    );
+  }
+
+  return await ctx.reply(
+    userActions?.data?.language === 'uz'
+      ? 'Iltimos, miqdorini kiriting:'
+      : 'Пожалуйста, введите сумму:'
+  );
+}
+
+export async function handleCommonExpenseCurrency(ctx: MyContext) {
+  await ctx.answerCallbackQuery();
+  const userId = ctx!.from!.id;
+  const message = ctx!.callbackQuery!.message;
+  const chatId = message!.chat!.id;
+  const messageId = message?.message_id;
+  // @ts-ignore
+  const currency = ctx!.callbackQuery!.data.split('_')[2].toUpperCase();
+  const userActions = await UserStepModel.findOne({ userId: userId });
+  if (!userActions) return;
+
+  if (!chatId || !messageId) return;
+
+  await ctx.api.deleteMessage(chatId, messageId);
+
+  if (userActions && userActions.step === 'ask_common_expense_currency') {
+    await UserStepModel.findOneAndUpdate(
+      { userId },
+      {
+        $set: {
+          step: 'ask_common_expense_description',
+          data: {
+            ...userActions?.data,
+            commonExpenseCurrency: currency
+          }
+        }
+      },
+      { upsert: true, new: true }
+    );
+    return await ctx.reply(
+      userActions.data.language === 'uz'
+        ? 'Izoh kiriting :'
+        : 'Введите описание :'
+    );
   }
 }

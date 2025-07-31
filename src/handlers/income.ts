@@ -25,26 +25,24 @@ export async function handleIncomeConversation(ctx: MyContext) {
     { upsert: true }
   );
 
-  if (userActions!.step === 'main_menu') {
-    await UserStepModel.findOneAndUpdate(
-      { userId },
-      {
-        $set: {
-          step: 'ask_amount_income',
-          data: {
-            ...userActions?.data,
-            type: 'income'
-          }
+  await UserStepModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        step: 'ask_amount_income',
+        data: {
+          ...userActions?.data,
+          type: 'income'
         }
-      },
-      { upsert: true, new: true }
-    );
-    return await ctx.reply(
-      userActions?.data?.language === 'uz'
-        ? 'Iltimos, kirim miqdorini kiriting:'
-        : 'Пожалуйста, введите сумму дохода:'
-    );
-  }
+      }
+    },
+    { upsert: true, new: true }
+  );
+  return await ctx.reply(
+    userActions?.data?.language === 'uz'
+      ? 'Iltimos, kirim miqdorini kiriting:'
+      : 'Пожалуйста, введите сумму дохода:'
+  );
 }
 
 export async function handleIncomeCurrency(ctx: MyContext) {
