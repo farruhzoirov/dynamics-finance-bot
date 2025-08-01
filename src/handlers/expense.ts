@@ -6,6 +6,7 @@ import { getCurrency } from '../helpers/get-currency';
 import { TransactionModel } from '../models/transaction.model';
 import { getBalance } from '../helpers/get-balance';
 import { Currency } from '../common/enums/currency.enum';
+import { checkBalanceAndProceedTransaction } from '../helpers/check-balance';
 
 export async function handleExpense(ctx: MyContext) {
   await ctx.answerCallbackQuery();
@@ -122,108 +123,31 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
         return;
       }
 
-      const user = await UserModel.findOne({ userId: userId });
-
       const balance = await getBalance(
         userActions.data.currency === Currency.USD ? Currency.USD : Currency.UZS
       );
-      if (balance.balance < amount) {
-        const difference = amount - balance.balance;
-        if (userActions.data.currency === Currency.USD) {
-          const convertToSum = difference * exchangeRate;
-          const balanceInSum = await getBalance(Currency.UZS);
-          if (balanceInSum.balance < convertToSum) {
-            await ctx.reply(
-              userActions.data.language === 'uz'
-                ? "Sizning balansingizda yetarli mablag' yo'q."
-                : 'Недостаточно средств на вашем балансе.'
-            );
-            return;
-          }
-          const balance = await getBalance(Currency.USD);
-          await Promise.all([
-            TransactionModel.create({
-              type: type,
-              amount: balance.balance,
-              currency: currency,
-              exchangeRate: exchangeRate,
-              description: description,
-              createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-            }),
-            TransactionModel.create({
-              type: type,
-              amount: convertToSum,
-              currency: Currency.UZS,
-              exchangeRate: exchangeRate,
-              description: description,
-              createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-            })
-          ]);
-        }
-        if (userActions.data.currency === Currency.UZS) {
-          const convertToUSD = difference / exchangeRate;
-          const balanceInUSD = await getBalance(Currency.USD);
-          if (balanceInUSD.balance < convertToUSD) {
-            await ctx.reply(
-              userActions.data.language === 'uz'
-                ? "Sizning balansingizda yetarli mablag' yo'q."
-                : 'Недостаточно средств на вашем балансе.'
-            );
-            return;
-          }
 
-          const [balanceInSum, getBalanceInUSD] = await Promise.all([
-            getBalance(Currency.UZS),
-            getBalance(Currency.USD)
-          ]);
-          const diff = amount - balanceInSum.balance;
-          const withDrawFromUSD = getBalanceInUSD.balance * exchangeRate - diff;
-          await Promise.all([
-            TransactionModel.create({
-              type: type,
-              amount: balanceInSum.balance,
-              currency: currency,
-              exchangeRate: exchangeRate,
-              description: description,
-              createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-            }),
-            TransactionModel.create({
-              type: type,
-              amount: getBalanceInUSD.balance,
-              currency: Currency.USD,
-              exchangeRate: exchangeRate,
-              description: description,
-              createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-            }),
-            TransactionModel.create({
-              type: TransactionType.income,
-              amount: withDrawFromUSD,
-              currency: currency,
-              exchangeRate: exchangeRate,
-              description: description,
-              createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-            })
-          ]);
-        }
-      } else {
-        await TransactionModel.create({
-          type: type,
-          amount: amount,
-          currency: currency,
-          exchangeRate: exchangeRate,
-          description: description,
-          createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-        });
-      }
-
+      const transaction = await checkBalanceAndProceedTransaction(
+        ctx,
+        balance.balance,
+        amount,
+        exchangeRate,
+        currency,
+        userActions.data.language,
+        type,
+        description
+      );
       userActions.data = rest;
       userActions.step = 'main_menu';
       await userActions.save();
-      await ctx.reply(
-        userActions.data.language === 'uz'
-          ? "Ma'lumotlar muvaffaqiyatli saqlandi. ✅"
-          : 'Данные успешно сохранены. ✅'
-      );
+
+      if (transaction) {
+        await ctx.reply(
+          userActions.data.language === 'uz'
+            ? "Ma'lumotlar muvaffaqiyatli saqlandi. ✅"
+            : 'Данные успешно сохранены. ✅'
+        );
+      }
     }
   } catch (err) {
     const userActions = await UserStepModel.findOne({ userId: ctx?.from?.id });

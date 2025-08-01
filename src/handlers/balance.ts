@@ -1,15 +1,37 @@
 import { MyContext } from '../bot';
 import { Currency } from '../common/enums/currency.enum';
+import { UserRoles } from '../common/enums/roles.enum';
 import { formatAmountByCurrency } from '../helpers/format-amount';
 import { getBalance } from '../helpers/get-balance';
 import { getCurrency } from '../helpers/get-currency';
 import { UserStepModel } from '../models/user-step.model';
+import { UserModel } from '../models/user.model';
 
 export async function getBalanceHandler(ctx: MyContext) {
   const userId = ctx?.from?.id;
-  const userActions = await UserStepModel.findOne({ userId: userId });
-  await ctx.answerCallbackQuery();
+  const [userActions, findUser] = await Promise.all([
+    UserStepModel.findOne({
+      userId: userId
+    }),
+    UserModel.findOne({
+      userId: userId
+    })
+  ]);
 
+  if (ctx.callbackQuery?.data) {
+    await ctx.answerCallbackQuery();
+  }
+
+  if (
+    findUser!.role !== UserRoles.director &&
+    findUser!.role !== UserRoles.cashier
+  ) {
+    return await ctx.reply(
+      userActions!.data!.language === 'uz'
+        ? 'Siz bu xususiyatdan foydalana olmaysiz.'
+        : 'Вы не можете воспользоваться этой функцией.'
+    );
+  }
   if (!userActions) return;
   const [balanceInUSD, balanceUZS, currency] = await Promise.all([
     getBalance(Currency.USD),

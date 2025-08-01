@@ -37,11 +37,11 @@ export async function handleContractApproval(ctx: MyContext) {
     let statusSection = '';
     let actionDate = '';
 
-    if (findDirectorActions) {
+    if (findDirectorActions && findCashierActions) {
       actionDate = new Date().toLocaleString();
-      findDirectorActions.actionDate = actionDate;
-      findDirectorActions.markModified(actionDate);
-      await findDirectorActions.save();
+      findCashierActions.actionDate = actionDate;
+      findCashierActions.markModified(actionDate);
+      await findCashierActions.save();
 
       const statusEmoji = '✅';
       const statusText =
@@ -65,7 +65,7 @@ export async function handleContractApproval(ctx: MyContext) {
       findManagerActions.data.language === 'uz'
         ? `📋 *Quyidagi ma'lumotlarni tasdiqlang:*\n` +
           `🆔 *Unikal ID:* ${findContract.uniqueId}\n` +
-          `📄 *📄 Shartnoma raqami:* ${findContract.contractId}\n` +
+          `📄 *Shartnoma raqami:* ${findContract.contractId}\n` +
           `💰 *Shartnoma summasi:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, findManagerActions.data.language)}\n` +
           `💱 *Valyuta:* ${findContract.currency}\n` +
           `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +

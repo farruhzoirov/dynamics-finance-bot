@@ -23,11 +23,17 @@ export async function handleStart(ctx: MyContext) {
   findUserActions.step = 'lang';
   await findUserActions.save();
 
+  const userLang = findUserActions.data?.language ?? 'ru';
+
   if (findUserActions && findUserActions.step === 'lang') {
     await ctx.api.setMyCommands([
       {
         command: 'start',
-        description: `${findUserActions.data?.language === 'uz' ? 'Botni ishga tushirish' : 'Запустить бота'}`
+        description: `${userLang === 'uz' ? 'Botni ishga tushirish' : 'Запустить бота'}`
+      },
+      {
+        command: 'main_menu',
+        description: `${userLang === 'uz' ? 'Asosiy menu' : 'Главное меню'}`
       }
     ]);
   }

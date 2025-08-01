@@ -18,9 +18,15 @@ import {
   handleExpenseConfirmation,
   handleExpenseCurrency
 } from '../handlers/expense';
+import { getBalanceHandler } from '../handlers/balance';
 
 // Start
 bot.command('start', handleStart);
+// Balance
+bot.command('balance', getBalanceHandler);
+
+//MainMenu
+bot.command('main_menu', handleMainMenu);
 
 // Language
 bot.callbackQuery('uzbek', handleUzbLang);

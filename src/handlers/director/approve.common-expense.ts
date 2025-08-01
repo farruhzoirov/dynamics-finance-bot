@@ -129,15 +129,15 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
         const cashierKeyboard = new InlineKeyboard()
           .text(
             cashierLang === 'uz' ? "👀 Ko'rib chiqilmoqda" : '👀 В процессе',
-            `cashier_in_progress:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_in_progress:${ctx!.match![1]}:${ctx!.match![2]}`
           )
           .text(
             cashierLang === 'uz' ? '✅ Tasdiqlash' : '✅ Подтвердить',
-            `cashier_approve:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_approve:${ctx!.match![1]}:${ctx!.match![2]}`
           )
           .text(
             cashierLang === 'uz' ? '❌ Bekor qilish' : '❌ Отменить',
-            `cashier_reject:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_reject:${ctx!.match![1]}:${ctx!.match![2]}`
           );
 
         const sentMsg = await ctx.api.sendMessage(
@@ -181,7 +181,7 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
 
     await ctx.editMessageReplyMarkup(undefined);
   } catch (err) {
-    console.error('Error in ApproveContract: Director', err);
-    await ctx.reply('Error in ApproveContract: Director');
+    console.error('Error in handleCommonExpenseApproval: Director', err);
+    await ctx.reply('Error in handleCommonExpenseApproval: Director');
   }
 }

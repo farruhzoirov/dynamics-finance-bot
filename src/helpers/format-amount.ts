@@ -13,7 +13,6 @@ export function formatAmountByCurrency(
   };
 
   const key = `${currencyType}_${language || 'ru'}`;
-  console.log(key);
   const config = map[key];
 
   if (!config) {
