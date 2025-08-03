@@ -34,7 +34,7 @@ export async function sendContractPage(
   lang: 'uz' | 'ru',
   isEdit = false
 ) {
-  const PAGE_SIZE = 10;
+  const PAGE_SIZE = 5;
   const start = page * PAGE_SIZE;
   const end = start + PAGE_SIZE;
   const paginatedContracts = contracts.slice(start, end);
@@ -46,7 +46,7 @@ export async function sendContractPage(
       if (lang === 'uz') {
         return `📄${c.uniqueId} <b>Shartnoma:</b> ${c.contractId} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
       } else {
-        return `📄${c.uniqueId} <b>Контракт:</b> ${c.contractId} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
+        return `📄${c.uniqueId} <b>Договор:</b> ${c.contractId} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
       }
     })
     .join('\n\n');

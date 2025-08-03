@@ -5,6 +5,7 @@ import { CommonExpenseStatuses } from '../common/enums/common-expense.enum';
 const CommonExpenseSchema = new Schema(
   {
     uniqueId: { type: Number, required: true },
+    contractId: { type: Number, default: null },
     expenseType: { type: String, required: true },
     amount: { type: Number, required: true },
     currency: { type: String, enum: Currency, required: true },

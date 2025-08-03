@@ -129,7 +129,7 @@ export async function handleContractApproval(ctx: MyContext) {
     );
 
     await TransactionModel.create({
-      type: TransactionType.income,
+      type: TransactionType.INCOME,
       amount: findContract.contractAmount,
       contractId: findContract.contractId,
       currency: findContract.currency,

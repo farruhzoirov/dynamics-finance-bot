@@ -7,7 +7,7 @@ import { UserRoles } from '../common/enums/roles.enum';
 const AUTHORIZED_USERS = {
   [configEnv.CASHIER_ID]: UserRoles.manager,
   8061136800: UserRoles.director,
-  830735800: UserRoles.director,
+  830735800: UserRoles.manager,
   689888057: UserRoles.director,
   106295438: UserRoles.manager,
   1258718142: UserRoles.cashier,

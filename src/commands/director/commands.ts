@@ -15,6 +15,7 @@ import { ContractModel } from '../../models/contract.model';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { CashierActionModel } from '../../models/cashier-actions.model';
+import { handleTransactionsHistory } from '../../handlers/director/transactions-history';
 
 bot.callbackQuery(
   /^director_in_progress:(.+)$/,
@@ -26,19 +27,25 @@ bot.callbackQuery(/^director_approve:(.+)$/, handleContractApproval);
 bot.callbackQuery(/^director_reject:(.+)$/, handleContractRejection);
 
 bot.callbackQuery(
-  /^director_in_progress_common_expense:([^:]+):([^:]+)$/,
+  /^director_in_progress_common_expense:([^:]+):([^:]+):([^:]+)$/,
   handleInProgressCommonExpenseConfirmation
 );
 bot.callbackQuery(
-  /^director_approve_common_expense:([^:]+):([^:]+)$/,
+  /^director_approve_common_expense:([^:]+):([^:]+):([^:]+)$/,
   handleCommonExpenseApproval
 );
 bot.callbackQuery(
-  /^director_reject_common_expense:([^:]+):([^:]+)$/,
+  /^director_reject_common_expense:([^:]+):([^:]+):([^:]+)$/,
   handleCommonExpenseRejection
 );
 
 bot.callbackQuery('balance', getBalanceHandler);
+
+bot.callbackQuery(/^transactions_page_(\d+)$/, async (ctx) => {
+  console.log('ok');
+  const page = parseInt(ctx.match![1]);
+  await handleTransactionsHistory(ctx, page);
+});
 
 bot.callbackQuery('contracts_director', handleGettingContracts);
 

@@ -16,16 +16,16 @@ bot.callbackQuery(/^cashier_approve:(.+)$/, handleContractApproval);
 bot.callbackQuery(/^cashier_reject:(.+)$/, handleContractRejection);
 
 bot.callbackQuery(
-  /^common_expense_cashier_in_progress:([^:]+):([^:]+)$/,
+  /^common_expense_cashier_in_progress:([^:]+):([^:]+):([^:]+)$/,
   handleInProgressCommonExpenseConfirmation
 );
 
 bot.callbackQuery(
-  /^common_expense_cashier_approve:([^:]+):([^:]+)$/,
+  /^common_expense_cashier_approve:([^:]+):([^:]+):([^:]+)$/,
   handleCommonExpenseApproval
 );
 
 bot.callbackQuery(
-  /^common_expense_cashier_reject:([^:]+):([^:]+)$/,
+  /^common_expense_cashier_reject:([^:]+):([^:]+):([^:]+)$/,
   handleCommonExpenseRejection
 );

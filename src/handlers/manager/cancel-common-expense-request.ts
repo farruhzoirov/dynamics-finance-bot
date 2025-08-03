@@ -14,6 +14,7 @@ export async function handleCommonExpenseRequestCancellation(ctx: MyContext) {
       managerInfo,
       commonExpenseDescription,
       commonExpenseConfirmationMessageId,
+      // expenseBasedContractId,
       ...rest
     } = userActions.data;
 

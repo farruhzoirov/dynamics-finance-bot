@@ -9,11 +9,13 @@ import {
   handleCommonExpenseCurrency,
   handleCommonExpensesRequest
 } from '../../handlers/manager/common-expenses-request';
-import { Expenses } from '../../common/enums/expense-type.enum';
 import { Languages } from '../../common/types/languages';
 import { getExpenseTypeLabel } from '../../helpers/get-common-expense-translations';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
-import { handleContractRequestCancellation } from '../../handlers/manager/cancel-contract-request';
+import { TransactionType } from '../../common/enums/transaction.enum';
+import { ContractModel } from '../../models/contract.model';
+import { getForContractExpenseKeyboardForManager } from '../../keyboards';
+import { handleCommonExpenseRequestCancellation } from '../../handlers/manager/cancel-common-expense-request';
 
 bot.callbackQuery('contract_expense', handleContractBasedExpense);
 
@@ -37,19 +39,15 @@ bot.callbackQuery(
   ['common_expense_uzs', 'common_expense_usd'],
   handleCommonExpenseCurrency
 );
+
 bot.callbackQuery(
-  ['common_expense_confirm_yes', 'common_expense_confirm_no'],
+  /^common_expense_confirm_yes:([^:]+):([^:]+):([^:]+)$/,
   handleCommonExpenseRequestConfirmation
 );
 
 bot.callbackQuery(
-  /^common_expense_confirm_yes:([^:]+):([^:]+)$/,
-  handleCommonExpenseRequestConfirmation
-);
-
-bot.callbackQuery(
-  /^common_expense_confirm_no:([^:]+):([^:]+)$/,
-  handleContractRequestCancellation
+  /^common_expense_confirm_no:([^:]+):([^:]+):([^:]+)$/,
+  handleCommonExpenseRequestCancellation
 );
 
 bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
@@ -179,30 +177,37 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
     const confirmIncomeKeyboard = new InlineKeyboard()
       .text(
         userActions.data.language === 'uz' ? 'Ha' : 'Да',
-        `common_expense_confirm_yes:${uniqueId}:${userActions.data?.expenseType}`
+        `common_expense_confirm_yes:${uniqueId}:${userActions.data?.expenseType}:${userActions.data.expenseBasedContractId || null}`
       )
       .text(
         userActions.data.language === 'uz' ? "Yo'q" : 'Нет',
-        `common_expense_confirm_no:${uniqueId}:${userActions.data?.expenseType}`
+        `common_expense_confirm_no:${uniqueId}:${userActions.data?.expenseType}:${userActions.data.expenseBasedContractId || null}`
       );
 
     const {
       commonExpenseAmount,
       commonExpenseCurrency,
       commonExpenseDescription,
-      managerInfo,
-      language
+      managerInfo
     } = userActions.data;
 
     const expenseTypeLabel = getExpenseTypeLabel(
-      userActions.data.expenseType as Expenses,
+      userActions.data.expenseType as TransactionType,
       userActions.data.language as Languages
     );
 
+    let contractBasedText = '';
+    if (userActions.data.expenseBasedContractId) {
+      contractBasedText =
+        userActions.data.language === 'uz'
+          ? `📄*Shartnoma raqami:* ${userActions.data.expenseBasedContractId}`
+          : `📄*Номер договора:* ${userActions.data.expenseBasedContractId}`;
+    }
+
     const text =
       userActions.data.language === 'uz'
-        ? `✅ *Ma'lumotlar qabul qilindi!*\n\n*📄 Tavsif:* ${commonExpenseDescription}\n*💵 Miqdor:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Chiqim turi:* ${expenseTypeLabel}\n*👤 Manager:* ${managerInfo}\n\nTasdiqlaysizmi?`
-        : `✅ *Данные получены!*\n\n*📄 Описание:* ${commonExpenseDescription}\n*💵 Сумма:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Тип расхода:* ${expenseTypeLabel}\n*👤 Менеджер:* ${managerInfo}\n\nХотите подтвердить?`;
+        ? `✅ *Ma'lumotlar qabul qilindi!*\n\n*📄 Tavsif:* ${commonExpenseDescription}\n*💵 Miqdor:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Chiqim turi:* ${expenseTypeLabel}\n*👤 Manager:* ${managerInfo}\n${contractBasedText}\n\nTasdiqlaysizmi?`
+        : `✅ *Данные получены!*\n\n*📄 Описание:* ${commonExpenseDescription}\n*💵 Сумма:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Тип расхода:* ${expenseTypeLabel}\n*👤 Менеджер:* ${managerInfo}\n${contractBasedText}\n\nХотите подтвердить?`;
 
     const commonExpenseConfirmationMessage = await ctx.reply(text, {
       reply_markup: confirmIncomeKeyboard,
@@ -213,6 +218,58 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
       commonExpenseConfirmationMessage.message_id;
     userActions.markModified('data');
     await userActions.save();
+  }
+
+  await next();
+});
+
+bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
+  const userId = ctx.from!.id;
+  const userActions = await UserStepModel.findOne({ userId: userId });
+
+  if (userActions?.step === 'ask_contract_id_for_expense') {
+    const contractId = ctx.message?.text as string;
+    const lang = userActions.data?.language === 'uz' ? 'uz' : 'ru';
+    const isNumeric = /^\d+$/.test(contractId);
+
+    if (!isNumeric) {
+      return await ctx.reply(
+        lang === 'uz'
+          ? 'Iltimos, to‘g‘ri formatda shartnoma raqami yoki unikal Idsini kiriting. (Masalan: 1000 yoki 12)'
+          : 'Пожалуйста, введите номер контракта или уникальный ID в правильном формате. (например: 1000 или 12).'
+      );
+    }
+
+    const id = parseInt(contractId, 10);
+    const findContract = await ContractModel.findOne({
+      $or: [
+        {
+          contractId: id
+        },
+        {
+          uniqueId: id
+        }
+      ]
+    });
+
+    if (!findContract) {
+      return await ctx.reply(
+        lang === 'uz' ? 'Shartnoma mavjud emas!' : 'Контракт не найдено!'
+      );
+    }
+
+    userActions.step = 'contract_based_menus';
+    userActions.data.expenseBasedContractId = findContract?.contractId;
+    userActions.markModified('data');
+    await userActions.save();
+
+    const contractBasedExpenseText =
+      userActions?.data.language === 'uz'
+        ? `Shartnoma №${userActions.data.expenseBasedContractId} bo'yicha xarajat turini tanlang:`
+        : 'Выберите вид расхода по договору №${userActions.data.expenseBasedContractId}:';
+    await ctx.reply(contractBasedExpenseText, {
+      reply_markup: getForContractExpenseKeyboardForManager(userActions)
+    });
   }
 
   await next();

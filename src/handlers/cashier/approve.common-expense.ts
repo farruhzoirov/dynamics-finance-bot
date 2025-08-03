@@ -1,7 +1,6 @@
 import { MyContext } from '../../bot';
 import { CommonExpenseStatuses } from '../../common/enums/common-expense.enum';
 import { Currency } from '../../common/enums/currency.enum';
-import { Expenses } from '../../common/enums/expense-type.enum';
 import { TransactionType } from '../../common/enums/transaction.enum';
 import { checkBalanceAndProceedTransaction } from '../../helpers/check-balance';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
@@ -20,7 +19,8 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
   try {
     if (!ctx.match) return;
     const uniqueId = parseInt(ctx.match[1]);
-    const expenseType = ctx.match[2] as Expenses;
+    const expenseType = ctx.match[2] as TransactionType;
+    const contractId = parseInt(ctx.match[3]) || null;
     const [
       commonExpense,
       findDirectorActions,
@@ -86,25 +86,33 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       lang
     );
 
-    const messageText =
+    let contractBasedText = '';
+    if (contractId) {
+      contractBasedText =
+        findManagerActions.data.language === 'uz'
+          ? `📄*Shartnoma raqami:* ${contractId}`
+          : `📄*Номер договора:* ${contractId}`;
+    }
+
+    const updatedText =
       lang === 'uz'
         ? `✅ *Ma'lumotlar qabul qilindi!*\n\n` +
           `📄 *Tavsif:* ${commonExpense.description}\n` +
           `💵 *Miqdor:* ${formattedAmount}\n` +
           `🏷 *Chiqim turi:* ${expenseLabel}\n` +
-          `👤 *Manager:* ${commonExpense.managerInfo}\n\n` +
+          `👤 *Manager:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
           `${statusSection}`
         : `✅ *Данные получены!*\n\n` +
           `📄 *Описание:* ${commonExpense.description}\n` +
           `💵 *Сумма:* ${formattedAmount}\n` +
           `🏷 *Тип расхода:* ${expenseLabel}\n` +
-          `👤 *Менеджер:* ${commonExpense.managerInfo}\n\n` +
+          `👤 *Менеджер:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
           `${statusSection}`;
 
     await ctx.api.editMessageText(
       commonExpense.managerUserId.toString(),
       commonExpense.managerConfirmationMessageId!,
-      messageText,
+      updatedText,
       { parse_mode: 'Markdown' }
     );
     const balance = await getBalance(
@@ -117,8 +125,9 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       exchangeRate,
       commonExpense.currency,
       findUserActions!.data!.language,
-      TransactionType.expense,
-      commonExpense.description
+      expenseType,
+      commonExpense.description,
+      contractId
     );
 
     if (transaction) {

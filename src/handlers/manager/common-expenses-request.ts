@@ -1,8 +1,5 @@
 import { MyContext } from '../../bot';
-import { Expenses } from '../../common/enums/expense-type.enum';
 import { TransactionType } from '../../common/enums/transaction.enum';
-import { getCurrency } from '../../helpers/get-currency';
-import { TransactionModel } from '../../models/transaction.model';
 import { UserStepModel } from '../../models/user-step.model';
 import { UserModel } from '../../models/user.model';
 
@@ -27,7 +24,9 @@ export async function handleCommonExpensesRequest(ctx: MyContext) {
 
   await ctx.answerCallbackQuery();
 
-  if ((Object.values(Expenses) as string[]).includes(expenseType as string)) {
+  if (
+    (Object.values(TransactionType) as string[]).includes(expenseType as string)
+  ) {
     await UserStepModel.findOneAndUpdate(
       { userId },
       {
@@ -35,7 +34,7 @@ export async function handleCommonExpensesRequest(ctx: MyContext) {
           step: 'ask_common_expense_amount',
           data: {
             ...userActions?.data,
-            type: TransactionType.expense,
+            type: expenseType,
             expenseType: expenseType
           }
         }

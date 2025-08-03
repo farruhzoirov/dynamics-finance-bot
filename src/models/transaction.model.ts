@@ -8,7 +8,7 @@ const TransactionSchema = new Schema(
     amount: { type: Number, default: 0, required: true },
     currency: { type: String, enum: Currency, required: true },
     exchangeRate: { type: Number, default: 1 },
-    contractId: { type: String, default: null },
+    contractId: { type: Number, default: null },
     description: { type: String, default: null },
     createdBy: { type: String, default: null }
   },

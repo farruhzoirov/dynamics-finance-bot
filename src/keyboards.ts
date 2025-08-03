@@ -60,7 +60,14 @@ export function getMainMenuKeyboardForDirector(userActions: any) {
       userActions.data?.language === 'uz' ? '📋 Shartnomalar' : '📋 Договори',
       'contracts_director'
     )
-    .row();
+    .row()
+    .text(
+      userActions.data?.language === 'uz'
+        ? '💳 Tranzaksiyalar tarixi'
+        : '💳 История транзакций',
+      'transactions_page_1'
+    );
+
   return keyboard;
 }
 

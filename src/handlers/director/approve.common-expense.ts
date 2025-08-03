@@ -8,13 +8,14 @@ import { CashierActionModel } from '../../models/cashier-actions.model';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { getExpenseTypeLabel } from '../../helpers/get-common-expense-translations';
 import { CommonExpenseModel } from '../../models/common-expenses.model';
-import { Expenses } from '../../common/enums/expense-type.enum';
+import { TransactionType } from '../../common/enums/transaction.enum';
 
 export async function handleCommonExpenseApproval(ctx: MyContext) {
   try {
     if (!ctx.match) return;
     const uniqueId = ctx.match[1];
-    const expenseType = ctx.match[2] as Expenses;
+    const expenseType = ctx.match[2] as TransactionType;
+    const contractId = ctx.match[3] || null;
 
     const [commonExpense, findDirectorActions, findUserActions, findCashiers] =
       await Promise.all([
@@ -75,19 +76,27 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       lang
     );
 
+    let contractBasedText = '';
+    if (contractId) {
+      contractBasedText =
+        findManagerActions.data.language === 'uz'
+          ? `📄*Shartnoma raqami:* ${contractId}`
+          : `📄*Номер договора:* ${contractId}`;
+    }
+
     const updatedText =
       lang === 'uz'
         ? `✅ *Ma'lumotlar qabul qilindi!*\n\n` +
           `📄 *Tavsif:* ${commonExpense.description}\n` +
           `💵 *Miqdor:* ${formattedAmount}\n` +
           `🏷 *Chiqim turi:* ${expenseLabel}\n` +
-          `👤 *Manager:* ${commonExpense.managerInfo}\n\n` +
+          `👤 *Manager:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
           `${statusSection}`
         : `✅ *Данные получены!*\n\n` +
           `📄 *Описание:* ${commonExpense.description}\n` +
           `💵 *Сумма:* ${formattedAmount}\n` +
           `🏷 *Тип расхода:* ${expenseLabel}\n` +
-          `👤 *Менеджер:* ${commonExpense.managerInfo}\n\n` +
+          `👤 *Менеджер:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
           `${statusSection}`;
 
     await ctx.api.editMessageText(
@@ -115,29 +124,29 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
               `📄 *Tavsif:* ${commonExpense.description}\n` +
               `💵 *Miqdor:* ${formattedAmount}\n` +
               `🏷 *Chiqim turi:* ${expenseLabel}\n` +
-              `👤 *Manager:* ${commonExpense.managerInfo}\n\n` +
+              `👤 *Manager:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
               `✅ *Tasdiqlovchi direktor:* ${findDirectorActions?.directorName || 'Director'}\n\n` +
               `📅 *Tasdiqlangan vaqt:* ${actionDate}`
             : `✅ *Данные получены!*\n\n` +
               `📄 *Описание:* ${commonExpense.description}\n` +
               `💵 *Сумма:* ${formattedAmount}\n` +
               `🏷 *Тип расхода:* ${expenseLabel}\n` +
-              `👤 *Менеджер:* ${commonExpense.managerInfo}\n\n` +
+              `👤 *Manager:* ${commonExpense.managerInfo}\n${contractBasedText}\n\n` +
               `✅ *Директор, одобривший договора:* ${findDirectorActions?.directorName || 'Director'}\n\n` +
               `📅 *Время одобрения:* ${actionDate}`;
 
         const cashierKeyboard = new InlineKeyboard()
           .text(
             cashierLang === 'uz' ? "👀 Ko'rib chiqilmoqda" : '👀 В процессе',
-            `common_expense_cashier_in_progress:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_in_progress:${ctx!.match![1]}:${ctx!.match![2]}:${contractId}`
           )
           .text(
             cashierLang === 'uz' ? '✅ Tasdiqlash' : '✅ Подтвердить',
-            `common_expense_cashier_approve:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_approve:${ctx!.match![1]}:${ctx!.match![2]}:${contractId}`
           )
           .text(
             cashierLang === 'uz' ? '❌ Bekor qilish' : '❌ Отменить',
-            `common_expense_cashier_reject:${ctx!.match![1]}:${ctx!.match![2]}`
+            `common_expense_cashier_reject:${ctx!.match![1]}:${ctx!.match![2]}:${contractId}`
           );
 
         const sentMsg = await ctx.api.sendMessage(

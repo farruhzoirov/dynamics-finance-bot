@@ -18,7 +18,7 @@ export async function getBalance(currency: string) {
         incomeTotal: {
           $sum: {
             $cond: [
-              { $eq: ['$_id', TransactionType.income] },
+              { $eq: ['$_id', TransactionType.INCOME] },
               '$totalAmount',
               0
             ]
@@ -27,7 +27,7 @@ export async function getBalance(currency: string) {
         expenseTotal: {
           $sum: {
             $cond: [
-              { $eq: ['$_id', TransactionType.expense] },
+              { $eq: ['$_id', TransactionType.EXPENSE] },
               '$totalAmount',
               0
             ]

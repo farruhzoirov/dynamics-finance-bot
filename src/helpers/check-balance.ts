@@ -14,7 +14,8 @@ export async function checkBalanceAndProceedTransaction(
   currency: Currency,
   language: Languages,
   type: TransactionType,
-  description: string
+  description: string,
+  contractId?: number | null
 ) {
   try {
     const user = await UserModel.findOne({ userId: ctx.from?.id });
@@ -34,6 +35,7 @@ export async function checkBalanceAndProceedTransaction(
         const balance = await getBalance(Currency.USD);
         await Promise.all([
           TransactionModel.create({
+            contractId: contractId,
             type: type,
             amount: balance.balance,
             currency: currency,
@@ -42,6 +44,7 @@ export async function checkBalanceAndProceedTransaction(
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           }),
           TransactionModel.create({
+            contractId: contractId,
             type: type,
             amount: convertToSum,
             currency: Currency.UZS,
@@ -70,6 +73,7 @@ export async function checkBalanceAndProceedTransaction(
         const withDrawFromUSD = getBalanceInUSD.balance * exchangeRate - diff;
         await Promise.all([
           TransactionModel.create({
+            contractId: contractId,
             type: type,
             amount: balanceInSum.balance,
             currency: currency,
@@ -78,6 +82,7 @@ export async function checkBalanceAndProceedTransaction(
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           }),
           TransactionModel.create({
+            contractId: contractId,
             type: type,
             amount: getBalanceInUSD.balance,
             currency: Currency.USD,
@@ -86,11 +91,12 @@ export async function checkBalanceAndProceedTransaction(
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           }),
           TransactionModel.create({
-            type: TransactionType.income,
+            contractId: contractId,
+            type: TransactionType.INCOME,
             amount: withDrawFromUSD,
             currency: currency,
             exchangeRate: exchangeRate,
-            description: description,
+            description: description + '(USD -> UZS)',
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           })
         ]);
@@ -99,6 +105,7 @@ export async function checkBalanceAndProceedTransaction(
     } else {
       await TransactionModel.create({
         type: type,
+        contractId: contractId,
         amount: amount,
         currency: currency,
         exchangeRate: exchangeRate,

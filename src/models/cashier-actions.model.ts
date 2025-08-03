@@ -1,12 +1,12 @@
 import { Schema, model } from 'mongoose';
 import { ContractStatuses } from '../common/enums/contract-status.enum';
-import { Expenses } from '../common/enums/expense-type.enum';
+import { TransactionType } from '../common/enums/transaction.enum';
 
 const CashierActionSchema = new Schema(
   {
     contractId: { type: Number, default: null },
     expenseTypeId: { type: Number, default: null },
-    expenseType: { type: String, enum: Expenses, default: null },
+    expenseType: { type: String, enum: TransactionType, default: null },
     messageId: { type: Number },
     action: { type: String, enum: ContractStatuses },
     actionDate: { type: String },

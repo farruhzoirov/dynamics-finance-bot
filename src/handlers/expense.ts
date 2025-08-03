@@ -37,7 +37,7 @@ export async function handleExpense(ctx: MyContext) {
           step: 'ask_amount_expense',
           data: {
             ...userActions?.data,
-            type: TransactionType.expense
+            type: TransactionType.EXPENSE
           }
         }
       },
