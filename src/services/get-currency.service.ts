@@ -1,7 +1,7 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
-async function getCurrencyRatesWithAxios() {
+export async function getCurrencyRates() {
   try {
     const response = await axios.get(
       'https://kapitalbank.uz/uz/services/exchange-rates/',
@@ -16,35 +16,32 @@ async function getCurrencyRatesWithAxios() {
         timeout: 10000
       }
     );
-
     const $ = cheerio.load(response.data);
-    const currencies = [];
+    let currencies: { buyValue: number; saleValue: number } = {
+      buyValue: 0,
+      saleValue: 0
+    };
 
-    // Table classini topish
     const table = $('.table-table-bordered-table-striped');
 
-    if (table.length === 0) {
-      console.log("Jadval topilmadi, boshqa selectorlarni sinab ko'ramiz...");
-
-      return 0;
+    if (!table.length) {
+      console.log('Html Table Not found: getCurrencyRatesWithAxios');
+      return false;
     }
 
     table.find('tbody tr').each((index, row) => {
       const cells = $(row).find('td');
       if (index === 1) {
-        currencies.push({
-          buyValue: $(cells[2]).text().trim(),
-          saleValue: $(cells[3]).text().trim()
-        });
+        currencies = {
+          buyValue: +$(cells[2]).text().trim(),
+          saleValue: +$(cells[3]).text().trim()
+        };
         return false;
       }
     });
-
-    console.log(currencies);
+    return currencies;
   } catch (error) {
-    console.error('Xatolik yuz berdi:', error);
-    return [];
+    console.error('Error in getCurrencyRatesWithAxios:', error);
+    return false;
   }
 }
-
-getCurrencyRatesWithAxios('');

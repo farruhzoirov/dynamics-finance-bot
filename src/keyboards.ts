@@ -2,7 +2,6 @@ import { InlineKeyboard } from 'grammy';
 
 export function getMainMenuKeyboardForManager(userActions: any) {
   const keyboard = new InlineKeyboard();
-
   keyboard
     .text(
       userActions.data?.language === 'uz' ? '🏢 Office' : '🏢 Офис',

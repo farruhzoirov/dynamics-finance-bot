@@ -3,7 +3,6 @@ import { UserModel } from '../models/user.model';
 import { UserStepModel } from '../models/user-step.model';
 import { TransactionType } from '../common/enums/transaction.enum';
 import { getCurrency } from '../helpers/get-currency';
-import { TransactionModel } from '../models/transaction.model';
 import { getBalance } from '../helpers/get-balance';
 import { Currency } from '../common/enums/currency.enum';
 import { checkBalanceAndProceedTransaction } from '../helpers/check-balance';
@@ -29,26 +28,26 @@ export async function handleExpense(ctx: MyContext) {
     { upsert: true }
   );
 
-  if (userActions!.step === 'main_menu') {
-    await UserStepModel.findOneAndUpdate(
-      { userId },
-      {
-        $set: {
-          step: 'ask_amount_expense',
-          data: {
-            ...userActions?.data,
-            type: TransactionType.EXPENSE
-          }
+  // if (userActions!.step === 'main_menu') {
+  await UserStepModel.findOneAndUpdate(
+    { userId },
+    {
+      $set: {
+        step: 'ask_amount_expense',
+        data: {
+          ...userActions?.data,
+          type: TransactionType.EXPENSE
         }
-      },
-      { upsert: true, new: true }
-    );
-    return await ctx.reply(
-      userActions?.data?.language === 'uz'
-        ? 'Iltimos, chiqim miqdorini kiriting:'
-        : 'Пожалуйста, Введите сумму вывода::'
-    );
-  }
+      }
+    },
+    { upsert: true, new: true }
+  );
+  return await ctx.reply(
+    userActions?.data?.language === 'uz'
+      ? 'Iltimos, chiqim miqdorini kiriting:'
+      : 'Пожалуйста, Введите сумму вывода::'
+  );
+  // }
 }
 
 export async function handleExpenseCurrency(ctx: MyContext) {

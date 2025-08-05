@@ -64,8 +64,8 @@ export async function handleContractRequestConfirmation(ctx: MyContext) {
 
         const text =
           dLang === 'uz'
-            ? `📝 Yangi shartnoma tasdiqlash uchun yuborildi:\n\n📄 Shartnoma raqami: ${userActions.data.contractId}\n💰 Shartnoma summasi: ${userActions.data.contractAmount}\n💱 Valyuta: ${userActions.data.currency}\n🔁 Ayirboshlash kursi: ${exchangeRate}\n📅 Shartnoma sanasi: ${userActions.data.contractDate}\n👤 Manager: ${userActions.data.info}\n📝 Tavsif: ${userActions.data.description}`
-            : `📝 Новый контракт отправлен на утверждение:\n\n📄 Номер договора: ${userActions.data.contractId}\n💰 Сумма договора: ${userActions.data.contractAmount}\n💱 Валюта: ${userActions.data.currency}\n🔁 Курс обмена: ${exchangeRate}\n📅 Дата договора: ${userActions.data.contractDate}\n👤 Менеджер: ${userActions.data.info}\n📝 Описание: ${userActions.data.description}`;
+            ? `📝 *Yangi shartnoma tasdiqlash uchun yuborildi:*\n\n*📄 Shartnoma raqami:* ${userActions.data.contractId}\n*💰 Shartnoma summasi:* ${userActions.data.contractAmount}\n*💱 Valyuta:* ${userActions.data.currency}\n*🔁 Ayirboshlash kursi:* ${exchangeRate}\n*📅 Shartnoma sanasi:* ${userActions.data.contractDate}\n*👤 Manager:* ${userActions.data.info}\n*📝 Tavsif:* ${userActions.data.description}`
+            : `📝 *Новый контракт отправлен на утверждение:*\n\n*📄 Номер договора:* ${userActions.data.contractId}\n*💰 Сумма договора:* ${userActions.data.contractAmount}\n*💱 Валюта:* ${userActions.data.currency}\n*🔁 Курс обмена:* ${exchangeRate}\n*📅 Дата договора:* ${userActions.data.contractDate}\n*👤 Менеджер:* ${userActions.data.info}\n*📝 Описание:* ${userActions.data.description}`;
 
         const keyboard = new InlineKeyboard()
           .text(
@@ -82,7 +82,8 @@ export async function handleContractRequestConfirmation(ctx: MyContext) {
           );
 
         const sentMsg = await ctx.api.sendMessage(director.userId, text, {
-          reply_markup: keyboard
+          reply_markup: keyboard,
+          parse_mode: 'Markdown'
         });
 
         await DirectorActionModel.create({

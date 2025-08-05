@@ -35,6 +35,7 @@ bot.callbackQuery('russian', handleRussianLang);
 // Main Keyboards
 bot.hears(['⚙ Sozlamalar', '⚙ Настройки'], getSettingsMenu);
 bot.hears(['🏠 Asosiy menyu', '🏠 Главное меню'], handleMainMenu);
+bot.hears(['💳 Balans', '💳 Баланс'], getBalanceHandler);
 
 //  Keyboards inside of Main Keyboards
 bot.hears(["🌐 Tilni o'zgartirish", '🌐 Изменить язык'], changeLanguageHandler);

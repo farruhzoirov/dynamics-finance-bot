@@ -7,6 +7,8 @@ import { ContractStatuses } from '../../common/enums/contract-status.enum';
 import { TransactionModel } from '../../models/transaction.model';
 import { TransactionType } from '../../common/enums/transaction.enum';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
+import { sendApprovalContractInfoToSheet } from '../../services/contracts-sheet.service';
+import { IApprovalContractPayload } from '../../common/interfaces/contract';
 
 export async function handleContractApproval(ctx: MyContext) {
   try {
@@ -127,7 +129,6 @@ export async function handleContractApproval(ctx: MyContext) {
         }
       }
     );
-
     await TransactionModel.create({
       type: TransactionType.INCOME,
       amount: findContract.contractAmount,
@@ -137,6 +138,21 @@ export async function handleContractApproval(ctx: MyContext) {
       description: findContract.description,
       createdBy: findContract.info
     });
+
+    const sheetBody: IApprovalContractPayload = {
+      uniqueId: findContract.uniqueId,
+      contractId: findContract.contractId,
+      contractAmount: findContract.contractAmount,
+      currency: findContract.currency,
+      exchangeRate: findContract.exchangeRate,
+      contractDate: findContract.contractDate,
+      info: findContract.info,
+      description: findContract.description,
+      directorAction: '✅',
+      cashierAction: '✅'
+    };
+
+    await sendApprovalContractInfoToSheet(ctx, sheetBody);
     await ctx.editMessageReplyMarkup(undefined);
   } catch (err) {
     console.error('Error in ApproveContract: Cashir', err);
