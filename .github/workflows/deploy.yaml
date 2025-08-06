@@ -41,7 +41,7 @@ jobs:
             tsc
 
             cat > .env <<EOL
-            TELEGRAM_BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
             MONGODB_URI=${{ secrets.MONGODB_URI }}
             EOL
 
