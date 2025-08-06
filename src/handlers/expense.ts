@@ -6,6 +6,7 @@ import { getCurrency } from '../helpers/get-currency';
 import { getBalance } from '../helpers/get-balance';
 import { Currency } from '../common/enums/currency.enum';
 import { checkBalanceAndProceedTransaction } from '../helpers/check-balance';
+import { getCurrencyRates } from '../services/get-currency.service';
 
 export async function handleExpense(ctx: MyContext) {
   await ctx.answerCallbackQuery();
@@ -116,12 +117,8 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
 
     if (answer === 'yes') {
       const { type, amount, currency, description, ...rest } = userActions.data;
-      const exchangeRate = await getCurrency();
-      if (exchangeRate === 0) {
-        await ctx.reply('Error: Exchange rate is 0');
-        return;
-      }
-
+      const currencyRates = await getCurrencyRates();
+      if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
       const balance = await getBalance(
         userActions.data.currency === Currency.USD ? Currency.USD : Currency.UZS
       );
@@ -130,7 +127,7 @@ export async function handleExpenseConfirmation(ctx: MyContext) {
         ctx,
         balance.balance,
         amount,
-        exchangeRate,
+        currencyRates.saleValue,
         currency,
         userActions.data.language,
         type,

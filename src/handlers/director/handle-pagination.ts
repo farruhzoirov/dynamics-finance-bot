@@ -12,7 +12,7 @@ export async function handlePagination(ctx: MyContext) {
   const lang = userActions?.data?.language === 'uz' ? 'uz' : 'ru';
 
   const contracts = await ContractModel.find({
-    status: ContractStatuses.APPROVED
+    status: { $in: [ContractStatuses.APPROVED, ContractStatuses.CLOSED] }
   }).sort({ createdAt: -1 });
 
   const callbackData = ctx.callbackQuery?.data;

@@ -1,0 +1,50 @@
+name: Deploy Dynamics Finance  bot to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: SSH to Server and Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+
+            if ! command -v pm2 &> /dev/null
+            then
+            sudo npm install -g pm2
+            fi
+
+            cd /home/${{ secrets.SERVER_USER }}
+
+            if [ ! -d "dynamics-finance-bot" ]; then
+            git clone https://github.com/farruhzoirov/dynamics-finance-bot.git
+            fi
+
+            cd dynamics-finance-bot
+            git reset --hard HEAD
+            git pull origin main
+
+            rm -rf node_modules app
+
+            npm install
+
+            npm run build
+
+            cat > .env <<EOL
+            TELEGRAM_BOT_TOKEN=${{ secrets.BOT_TOKEN }}
+            MONGODB_URI=${{ secrets.MONGODB_URI }}
+            EOL
+
+            pm2 stop dynamics-finance-bot || true
+            pm2 start dist/main.js --name dynamics-finance-bot
+            pm2 save

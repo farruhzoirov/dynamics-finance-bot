@@ -6,7 +6,6 @@ import {
   type SessionFlavor
 } from 'grammy';
 import { configEnv } from './config/config-env';
-import { authMiddleware } from './middleware/auth';
 import { SessionData } from './types';
 import { connectToDatabase } from './db/database';
 
@@ -14,14 +13,13 @@ export type MyContext = Context & SessionFlavor<SessionData>;
 
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
 
-bot.use(authMiddleware);
+// bot.use(authMiddleware);
 
 import './commands/index';
 import { getCurrencyRates } from './services/get-currency.service';
 const startBot = async () => {
   await connectToDatabase();
   console.log('Connected to MongoDB successfully!');
-
   const checkCurrencyRates = await getCurrencyRates();
   if (!checkCurrencyRates) {
     throw Error("Can't get currency rates");

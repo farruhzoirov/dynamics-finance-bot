@@ -1,5 +1,6 @@
 import { MyContext } from '../../bot';
 import { RemainingContractFields } from '../../common/types/contract';
+import { ContractModel } from '../../models/contract.model';
 import { UserStepModel } from '../../models/user-step.model';
 
 export async function handleContractRequestCancellation(ctx: MyContext) {

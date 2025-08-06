@@ -3,9 +3,9 @@ import { Currency } from '../common/enums/currency.enum';
 import { UserRoles } from '../common/enums/roles.enum';
 import { formatAmountByCurrency } from '../helpers/format-amount';
 import { getBalance } from '../helpers/get-balance';
-import { getCurrency } from '../helpers/get-currency';
 import { UserStepModel } from '../models/user-step.model';
 import { UserModel } from '../models/user.model';
+import { getCurrencyRates } from '../services/get-currency.service';
 
 export async function getBalanceHandler(ctx: MyContext) {
   const userId = ctx?.from?.id;
@@ -33,11 +33,13 @@ export async function getBalanceHandler(ctx: MyContext) {
     );
   }
   if (!userActions) return;
-  const [balanceInUSD, balanceUZS, currency] = await Promise.all([
+  const [balanceInUSD, balanceUZS, currencyRates] = await Promise.all([
     getBalance(Currency.USD),
     getBalance(Currency.UZS),
-    getCurrency()
+    getCurrencyRates()
   ]);
+
+  if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
   const lang = userActions.data.language;
   await UserStepModel.updateOne(
@@ -55,7 +57,8 @@ export async function getBalanceHandler(ctx: MyContext) {
       `💳 *Balans holati:*\n\n` +
         `🇺🇸 AQSh dollari: *${formatAmountByCurrency(balanceInUSD.balance, Currency.USD, lang)}*\n` +
         `🇺🇿 So'm: *${formatAmountByCurrency(balanceUZS.balance, Currency.UZS, lang)}*\n` +
-        `Dollar kursi: *${currency} so'm*\n\n` +
+        `AQSH dollari sotib olish kursi(Kapitalbank): *${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, lang)}*\n` +
+        `AQSH dollari sotish kursi(Kapitalbank): *${formatAmountByCurrency(currencyRates.saleValue, Currency.UZS, lang)}*\n\n` +
         `📌 Bu balans hisobingizdagi mavjud mablag'ni ifodalaydi. Yangi tranzaksiyalar yoki operatsiyalarni amalga oshirishdan oldin balansni tekshirib turing.`,
       { parse_mode: 'Markdown' }
     );
@@ -65,7 +68,8 @@ export async function getBalanceHandler(ctx: MyContext) {
     `💳 *Ваш текущий баланс:*\n\n` +
       `🇺🇸 Доллары США: *${formatAmountByCurrency(balanceInUSD.balance, Currency.USD, 'ru')}*\n` +
       `🇺🇿 Сум: *${formatAmountByCurrency(balanceInUSD.balance, Currency.USD, 'ru')}*\n` +
-      `Курс доллара: *${currency} сум*\n\n` +
+      `Курс покупки доллара США (Капиталбанк): *${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, lang)}*\n` +
+      `Курс продажи доллара США (Капиталбанк): *${formatAmountByCurrency(currencyRates.saleValue, Currency.UZS, lang)}*\n\n` +
       `📌 Это ваш текущий остаток на счету. Перед выполнением операций или транзакций рекомендуем проверить баланс.`,
     { parse_mode: 'Markdown' }
   );

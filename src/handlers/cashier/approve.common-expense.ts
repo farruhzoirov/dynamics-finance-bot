@@ -11,6 +11,7 @@ import { CashierActionModel } from '../../models/cashier-actions.model';
 import { CommonExpenseModel } from '../../models/common-expenses.model';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { UserStepModel } from '../../models/user-step.model';
+import { getCurrencyRates } from '../../services/get-currency.service';
 
 // Director Actions are contract based actions actually.
 // User Actions are actions that interact with bot .
@@ -26,7 +27,7 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       findDirectorActions,
       findCashierActions,
       findUserActions,
-      exchangeRate
+      currencyRates
     ] = await Promise.all([
       CommonExpenseModel.findOne({
         uniqueId: uniqueId,
@@ -35,10 +36,11 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       DirectorActionModel.findOne({ expenseTypeId: uniqueId, expenseType }),
       CashierActionModel.findOne({ expenseTypeId: uniqueId, expenseType }),
       UserStepModel.findOne({ userId: ctx.from?.id }),
-      getCurrency()
+      getCurrencyRates()
     ]);
 
     await ctx.answerCallbackQuery();
+    if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     if (!commonExpense) {
       return await ctx.reply("CommonExpense doesn't exist.");
@@ -122,7 +124,7 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       ctx,
       balance.balance,
       commonExpense.amount,
-      exchangeRate,
+      currencyRates.saleValue,
       commonExpense.currency,
       findUserActions!.data!.language,
       expenseType,

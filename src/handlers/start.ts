@@ -6,7 +6,22 @@ import { handleInitialMenu } from './initial';
 export async function handleStart(ctx: MyContext) {
   const findUserActions = await UserStepModel.findOne({ userId: ctx.from?.id });
 
-  if (!findUserActions) return;
+  if (!findUserActions) {
+    return await ctx.reply('Iltimos, telefon raqamingizni yuboring:', {
+      reply_markup: {
+        keyboard: [
+          [
+            {
+              text: '📱 Raqamni yuborish',
+              request_contact: true
+            }
+          ]
+        ],
+        resize_keyboard: true,
+        one_time_keyboard: true
+      }
+    });
+  }
 
   if (
     findUserActions &&

@@ -19,6 +19,9 @@ import {
   handleExpenseCurrency
 } from '../handlers/expense';
 import { getBalanceHandler } from '../handlers/balance';
+import { UserRoles } from '../common/enums/roles.enum';
+import { UserModel } from '../models/user.model';
+import { handleInitialMenu } from '../handlers/initial';
 
 // Start
 bot.command('start', handleStart);
@@ -48,6 +51,48 @@ bot.callbackQuery(
   ['income_confirm_yes', 'income_confirm_no'],
   handleIncomeConfirmation
 );
+
+const AUTHORIZED_PHONES: Record<string, string> = {
+  '+998975450409': UserRoles.manager,
+  '+998999660913': UserRoles.director,
+  '+998910128811': UserRoles.cashier,
+  '+998935847507': UserRoles.manager,
+  '+998946564230': UserRoles.manager
+} as const;
+
+bot.on('message:contact', async (ctx, next: NextFunction) => {
+  const phoneNumber = ctx.message.contact.phone_number;
+  if (!phoneNumber || !Object.keys(AUTHORIZED_PHONES).includes(phoneNumber)) {
+    await ctx.reply(`Please contact with adminstrator.`);
+    return;
+  }
+
+  const userId = ctx.from?.id;
+  const userName = ctx.from?.username;
+  const userFirstName = ctx.from?.first_name;
+  const userLastName = ctx.from?.last_name;
+
+  const role = AUTHORIZED_PHONES[phoneNumber as string];
+
+  await Promise.all([
+    UserStepModel.create({
+      userId,
+      step: 'main_menu',
+      data: {}
+    }),
+    UserModel.create({
+      userId,
+      phone: phoneNumber,
+      userName: userName || null,
+      userFirstName: userFirstName || null,
+      userLastName: userLastName || null,
+      role
+    })
+  ]);
+  await ctx.reply('✅ Registered Successfully /start');
+  await handleInitialMenu(ctx);
+  await next();
+});
 
 // For expense
 bot.callbackQuery('expense', handleExpense);

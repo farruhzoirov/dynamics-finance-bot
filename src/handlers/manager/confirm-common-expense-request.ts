@@ -11,6 +11,7 @@ import { getExpenseTypeLabel } from '../../helpers/get-common-expense-translatio
 import { Languages } from '../../common/types/languages';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { TransactionType } from '../../common/enums/transaction.enum';
+import { getCurrencyRates } from '../../services/get-currency.service';
 
 export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
   try {
@@ -20,14 +21,15 @@ export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
     const uniqueId = parseInt(ctx.match[1]);
     const commonExpenseType = ctx.match[2] as TransactionType;
     const contractId = ctx.match[3] ? parseInt(ctx.match[3]) : null;
-    const [userActions, findDirectors, exchangeRate] = await Promise.all([
+    const [userActions, findDirectors, currencyRates] = await Promise.all([
       UserStepModel.findOne({ userId: userId }),
       UserModel.find({ role: UserRoles.director }),
-      getCurrency()
+      getCurrencyRates()
     ]);
 
     if (!userActions) return;
     if (!findDirectors.length) return await ctx.reply("Directors don't exist");
+    if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     await ctx.answerCallbackQuery();
 
@@ -39,7 +41,6 @@ export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
       managerInfo,
       commonExpenseDescription,
       commonExpenseConfirmationMessageId,
-      // expenseBasedContractId,
       ...rest
     } = userActions.data;
 
@@ -49,7 +50,7 @@ export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
       expenseType: commonExpenseType,
       amount: commonExpenseAmount,
       currency: commonExpenseCurrency,
-      exchangeRate,
+      exchangeRate: currencyRates,
       managerInfo,
       description: commonExpenseDescription,
       status: CommonExpenseStatuses.SENT,

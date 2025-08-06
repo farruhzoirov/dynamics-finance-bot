@@ -1,8 +1,8 @@
 import { MyContext } from '../bot';
 import { UserModel } from '../models/user.model';
 import { UserStepModel } from '../models/user-step.model';
-import { getCurrency } from '../helpers/get-currency';
 import { TransactionModel } from '../models/transaction.model';
+import { getCurrencyRates } from '../services/get-currency.service';
 
 export async function handleIncomeConversation(ctx: MyContext) {
   // Steps -  ask_amount, ask_currency, ask_description,
@@ -110,18 +110,16 @@ export async function handleIncomeConfirmation(ctx: MyContext) {
 
   if (answer === 'yes') {
     const { type, amount, currency, description, ...rest } = userActions.data;
-    const exchangeRate = await getCurrency();
-    if (exchangeRate === 0) {
-      await ctx.reply('Error: Exchange rate is 0');
-      return;
-    }
+    const currencyRates = await getCurrencyRates();
+    if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
+
     const user = await UserModel.findOne({ userId: userId });
     await Promise.all([
       TransactionModel.create({
         type: type,
         amount: amount,
         currency: currency,
-        exchangeRate: exchangeRate,
+        exchangeRate: currencyRates.buyValue,
         description: description,
         createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
       })

@@ -9,17 +9,20 @@ import { TransactionType } from '../../common/enums/transaction.enum';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { sendApprovalContractInfoToSheet } from '../../services/contracts-sheet.service';
 import { IApprovalContractPayload } from '../../common/interfaces/contract';
+import { UserModel } from '../../models/user.model';
 
 export async function handleContractApproval(ctx: MyContext) {
   try {
     if (!ctx.match) return;
     const contractId = ctx.match[1];
     const [
+      findUser,
       findContract,
       findDirectorActions,
       findCashierActions,
       findUserActions
     ] = await Promise.all([
+      UserModel.findOne({ userId: ctx.from!.id }),
       ContractModel.findOne({
         contractId: contractId
       }),
@@ -136,7 +139,8 @@ export async function handleContractApproval(ctx: MyContext) {
       currency: findContract.currency,
       exchangeRate: findContract.exchangeRate,
       description: findContract.description,
-      createdBy: findContract.info
+      createdBy:
+        `${findUser?.userFirstName || ''} ${findUser?.userLastName || ''}`.trim()
     });
 
     const sheetBody: IApprovalContractPayload = {

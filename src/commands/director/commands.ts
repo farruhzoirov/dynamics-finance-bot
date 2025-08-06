@@ -6,7 +6,10 @@ import { handleContractApproval } from '../../handlers/director/approve.contract
 import { handleCommonExpenseRejection } from '../../handlers/director/reject.common-expense';
 import { handleInProgressCommonExpenseConfirmation } from '../../handlers/director/inProgress.common-expense';
 import { handleCommonExpenseApproval } from '../../handlers/director/approve.common-expense';
-import { handleGettingContracts } from '../../handlers/director/get-contracts';
+import {
+  getStatusText,
+  handleGettingContracts
+} from '../../handlers/director/get-contracts';
 import { handlePagination } from '../../handlers/director/handle-pagination';
 import { handleSearchingContracts } from '../../handlers/director/search-contracts';
 import { NextFunction } from 'grammy';
@@ -105,6 +108,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
     const cashierStatusText =
       lang === 'uz' ? 'Kassir tasdiqlagan' : 'Кассир одобрил';
 
+    const contractStatusText = getStatusText(findContract.status, lang);
+
     const statusSection =
       lang === 'uz'
         ? `🔔 *Director harakati:*\n${statusEmoji} *Status:* ${statusText}\n📅 *Vaqt:* ${findDirectorActions?.actionDate || "Noma'lum"}\n👤 *Director:* ${findDirectorActions?.directorName || 'Director'}\n\n🔔 *Kassir harakati:*\n${cashierStatusEmoji} *Status:* ${cashierStatusText}\n📅 *Vaqt:* ${findCashierActions?.actionDate || "Noma'lum"}\n 👤 *Kassir:* ${findCashierActions?.cashierName || 'Cashier'} `
@@ -119,7 +124,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
           `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
           `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
           `👤 *Manager haqida ma'lumot:* ${findContract.info}\n` +
-          `📝 *Tavsif:* ${findContract.description}\n\n` +
+          `📝 *Tavsif:* ${findContract.description}\n` +
+          `${contractStatusText}\n\n` +
           `${statusSection}`
         : `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
           `📄 *Номер договора:* ${findContract.contractId}\n` +
@@ -128,7 +134,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
           `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
           `📅 *Дата договора:* ${findContract.contractDate}\n` +
           `👤 *Информация о менеджере:* ${findContract.info}\n` +
-          `📝 *Описание:* ${findContract.description}\n\n` +
+          `📝 *Описание:* ${findContract.description}\n` +
+          `${contractStatusText}\n\n` +
           `${statusSection}`;
 
     await ctx.reply(text, {

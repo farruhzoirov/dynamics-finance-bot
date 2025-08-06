@@ -32,6 +32,11 @@ export function getMainMenuKeyboardForManager(userActions: any) {
         : '💸 Расход по договору',
       'contract_expense'
     )
+    .row()
+    .text(
+      userActions.data?.language === 'uz' ? '📋 Shartnomalar' : '📋 Договори',
+      'contracts_director'
+    )
     .row();
 
   return keyboard;
@@ -88,6 +93,12 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
     .text(
       userActions.data.language === 'uz' ? '💸 Chiqim' : '💸 Расход',
       'expense'
+    )
+    .text(
+      userActions.data?.language === 'uz'
+        ? '💳 Tranzaksiyalar tarixi'
+        : '💳 История транзакций',
+      'transactions_page_1'
     )
     .row();
   return keyboard;

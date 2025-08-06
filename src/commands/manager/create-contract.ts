@@ -11,6 +11,8 @@ import { handleContractRequestCancellation } from '../../handlers/manager/cancel
 import { validateAndParseAmount } from '../../validators/amount.validator';
 import { validateContractId } from '../../validators/contract-id.validator';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
+import { getCurrencyRates } from '../../services/get-currency.service';
+import { Currency } from '../../common/enums/currency.enum';
 
 bot.callbackQuery('create_contract', handleContractCreation);
 bot.callbackQuery(['contract_usd', 'contract_uzs'], handleContractCurreny);
@@ -227,12 +229,13 @@ bot.on('message:text', async (ctx) => {
 
   if (userActions?.step === 'ask_contract_confirmation') {
     let uniqueId: number;
-
-    const [contractsCount, latestContract, exchangeRate] = await Promise.all([
+    const [contractsCount, latestContract, currencyRates] = await Promise.all([
       ContractModel.countDocuments(),
       ContractModel.findOne().sort({ createdAt: -1 }),
-      getCurrency()
+      getCurrencyRates()
     ]);
+
+    if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     if (!contractsCount || !latestContract) {
       uniqueId = 1;
@@ -272,7 +275,7 @@ bot.on('message:text', async (ctx) => {
 *📄 Shartnoma raqami:* ${userActions.data.contractId}
 *💰 Shartnoma summasi:* ${formatAmountByCurrency(userActions.data.contractAmount, userActions.data.currency, userActions.data.language)}
 *💱 Valyuta:* ${userActions.data.currency}
-*🔁 Ayirboshlash kursi:* ${exchangeRate}
+*🔁 Ayirboshlash kursi:* ${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, userActions.data.language)}
 *📅 Shartnoma sanasi:* ${userActions.data.contractDate}
 *👤 Manager haqida ma'lumot:* ${userActions.data.info}
 *📝 Tavsif:* ${userActions.data.description}
@@ -283,7 +286,7 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
 *📄 Номер договора:* ${userActions.data.contractId}
 *💰 Сумма договора:* ${formatAmountByCurrency(userActions.data.contractAmount, userActions.data.currency, userActions.data.language)}
 *💱 Валюта:* ${userActions.data.currency}
-*🔁 Курс обмена:* ${exchangeRate}
+*🔁 Курс обмена:* ${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, userActions.data.language)}
 *📅 Дата договора:* ${userActions.data.contractDate}
 *👤 Информация о менеджере:* ${userActions.data.info}
 *📝 Описание:* ${userActions.data.description}

@@ -7,15 +7,14 @@ import { InlineKeyboard } from 'grammy';
 
 export async function handleGettingContracts(ctx: MyContext) {
   const userId = ctx.from?.id;
+  // const limit = 5;
+  // const skip =
   if (!userId) return;
-
   const userActions = await UserStepModel.findOne({ userId });
   const lang = userActions?.data?.language === 'uz' ? 'uz' : 'ru';
-
   await ctx.answerCallbackQuery();
-
   const contracts = await ContractModel.find({
-    status: ContractStatuses.APPROVED
+    status: { $in: [ContractStatuses.APPROVED, ContractStatuses.CLOSED] }
   }).sort({ createdAt: -1 });
 
   if (!contracts.length) {
@@ -43,10 +42,12 @@ export async function sendContractPage(
 
   const text = paginatedContracts
     .map((c, i) => {
+      const statusText = getStatusText(c.status, lang);
+
       if (lang === 'uz') {
-        return `📄${c.uniqueId} <b>Shartnoma:</b> ${c.contractId} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
+        return `📄${c.uniqueId} <b>Shartnoma:</b> ${c.contractId} | ${statusText} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
       } else {
-        return `📄${c.uniqueId} <b>Договор:</b> ${c.contractId} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
+        return `📄${c.uniqueId} <b>Договор:</b> ${c.contractId} | ${statusText} | 💰 ${formatAmountByCurrency(c.contractAmount, c.currency, lang)} | 💱 ${c.exchangeRate} | 📅 ${c.contractDate} | ℹ️ ${c.info} | 📝 ${c.description}`;
       }
     })
     .join('\n\n');
@@ -76,3 +77,20 @@ export async function sendContractPage(
     });
   }
 }
+
+export const getStatusText = (status: string, lang: string) => {
+  const statusMap: Record<string, { uz: string; ru: string; emoji: string }> = {
+    [ContractStatuses.APPROVED]: {
+      uz: 'Tasdiqlangan',
+      ru: 'Утверждён',
+      emoji: '✅'
+    },
+    [ContractStatuses.CLOSED]: {
+      uz: 'Yopilgan',
+      ru: 'Закрыт',
+      emoji: '🔒'
+    }
+  };
+  const item = statusMap[status] || { uz: status, ru: status, emoji: '' };
+  return `${item.emoji} ${lang === 'uz' ? item.uz : item.ru}`;
+};
