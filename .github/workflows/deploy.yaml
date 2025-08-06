@@ -1,4 +1,4 @@
-name: Deploy Dynamics Finance  bot to Server
+name: Deploy Dynamics Finance bot to Server
 
 on:
   push:
@@ -18,16 +18,17 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-
+          port: 22
+          script: |
             if ! command -v pm2 &> /dev/null
             then
-            sudo npm install -g pm2
+              sudo npm install -g pm2
             fi
 
             cd /home/${{ secrets.SERVER_USER }}
 
             if [ ! -d "dynamics-finance-bot" ]; then
-            git clone https://github.com/farruhzoirov/dynamics-finance-bot.git
+              git clone https://github.com/farruhzoirov/dynamics-finance-bot.git
             fi
 
             cd dynamics-finance-bot
@@ -37,7 +38,6 @@ jobs:
             rm -rf node_modules app
 
             npm install
-
             npm run build
 
             cat > .env <<EOL
