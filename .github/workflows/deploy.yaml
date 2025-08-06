@@ -38,7 +38,7 @@ jobs:
             rm -rf node_modules app
 
             npm install
-            npm run build
+            tsc
 
             cat > .env <<EOL
             TELEGRAM_BOT_TOKEN=${{ secrets.BOT_TOKEN }}
@@ -46,5 +46,5 @@ jobs:
             EOL
 
             pm2 stop dynamics-finance-bot || true
-            pm2 start dist/main.js --name dynamics-finance-bot
+            pm2 start dist/bot.js --name dynamics-finance-bot
             pm2 save
