@@ -65,7 +65,6 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
     const searchText = ctx!.message!.text as string;
     const lang = userActions.data?.language === 'uz' ? 'uz' : 'ru';
     const isNumeric = /^\d+$/.test(searchText);
-
     if (!isNumeric) {
       return await ctx.reply(
         lang === 'uz'

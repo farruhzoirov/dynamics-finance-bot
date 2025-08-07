@@ -22,6 +22,7 @@ import { getBalanceHandler } from '../handlers/balance';
 import { UserRoles } from '../common/enums/roles.enum';
 import { UserModel } from '../models/user.model';
 import { handleInitialMenu } from '../handlers/initial';
+import { getCurrencyRatesForInitialMenu } from '../handlers/currency';
 
 // Start
 bot.command('start', handleStart);
@@ -43,6 +44,10 @@ bot.hears(['💳 Balans', '💳 Баланс'], getBalanceHandler);
 //  Keyboards inside of Main Keyboards
 bot.hears(["🌐 Tilni o'zgartirish", '🌐 Изменить язык'], changeLanguageHandler);
 bot.hears(['⬅️ Ortga', '⬅️ Назад'], handleBack);
+bot.hears(
+  ['💱 Valyuta kursi (USD → UZS)', '💱 Курс валют (USD → UZS)'],
+  getCurrencyRatesForInitialMenu
+);
 
 // For income
 bot.callbackQuery('add_income', handleIncomeConversation);

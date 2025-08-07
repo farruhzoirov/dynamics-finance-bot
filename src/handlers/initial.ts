@@ -20,6 +20,12 @@ export async function handleInitialMenu(ctx: MyContext) {
     .text(
       userActions?.data?.language === 'uz' ? '⚙ Sozlamalar' : '⚙ Настройки'
     )
+    .row()
+    .text(
+      userActions?.data?.language === 'uz'
+        ? '💱 Valyuta kursi (USD → UZS)'
+        : '💱 Курс валют (USD → UZS)'
+    )
     .row();
 
   switch (user.role) {
@@ -37,7 +43,13 @@ export async function handleInitialMenu(ctx: MyContext) {
             : '⚙ Настройки'
         )
         .row()
-        .text(userActions?.data?.language === 'uz' ? '💳 Balans' : '💳 Баланс');
+        .text(userActions?.data?.language === 'uz' ? '💳 Balans' : '💳 Баланс')
+        .text(
+          userActions?.data?.language === 'uz'
+            ? '💱 Valyuta kursi (USD → UZS)'
+            : '💱 Курс валют (USD → UZS)'
+        )
+        .row();
       break;
   }
 

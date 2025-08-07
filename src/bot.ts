@@ -1,20 +1,9 @@
-import {
-  Bot,
-  type Context,
-  GrammyError,
-  HttpError,
-  type SessionFlavor
-} from 'grammy';
+import { Bot, type Context, GrammyError, HttpError } from 'grammy';
 import { configEnv } from './config/config-env';
-import { SessionData } from './types';
 import { connectToDatabase } from './db/database';
 
-export type MyContext = Context & SessionFlavor<SessionData>;
-
+export type MyContext = Context;
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
-
-// bot.use(authMiddleware);
-
 import './commands/index';
 import { getCurrencyRates } from './services/get-currency.service';
 const startBot = async () => {
