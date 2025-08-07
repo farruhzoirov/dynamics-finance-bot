@@ -35,16 +35,16 @@ jobs:
             git reset --hard HEAD
             git pull origin main
 
-            rm -rf node_modules app
-
-            npm install
-            tsc
+            rm -rf node_modules dist
+            npm install --force
+            npx tsc
 
             cat > .env <<EOL
             TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
             MONGODB_URI=${{ secrets.MONGODB_URI }}
             EOL
 
-            pm2 stop dynamics-finance-bot || true
-            pm2 start dist/bot.js --name dynamics-finance-bot
-            pm2 save
+            pm2 reload dynamics-finance-bot
+            # pm2 stop dynamics-finance-bot || true
+            # pm2 start dist/bot.js --name dynamics-finance-bot
+            # pm2 save

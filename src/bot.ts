@@ -1,6 +1,11 @@
 import { Bot, type Context, GrammyError, HttpError } from 'grammy';
 import { configEnv } from './config/config-env';
 import { connectToDatabase } from './db/database';
+import Blob, { File, FormData, fetch } from 'undici';
+globalThis.File = File as any;
+globalThis.Blob = Blob as any;
+globalThis.FormData = FormData as any;
+globalThis.fetch = fetch as any;
 
 export type MyContext = Context;
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
