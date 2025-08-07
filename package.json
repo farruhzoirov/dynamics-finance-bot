@@ -16,10 +16,15 @@
   "license": "ISC",
   "author": "Farruh Zoirov",
   "type": "commonjs",
-  "main": "bot.js",
+  "main": "dist/bot.js",
   "scripts": {
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "dev": "ts-node src/bot.ts",
+    "dev:watch": "nodemon --exec ts-node src/bot.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon"
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
     "@grammyjs/conversations": "^2.1.0",
@@ -30,7 +35,8 @@
     "mongoose": "^8.16.4",
     "node-html-parser": "^7.0.1",
     "puppeteer": "^24.15.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.0",
