@@ -13,6 +13,7 @@ export interface IContract {
 }
 
 export interface IApprovalContractPayload {
+  sheetName?: string;
   uniqueId: number;
   contractId: number;
   contractAmount: number;

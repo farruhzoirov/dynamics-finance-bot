@@ -3,6 +3,8 @@ import { UserModel } from '../models/user.model';
 import { UserStepModel } from '../models/user-step.model';
 import { TransactionModel } from '../models/transaction.model';
 import { getCurrencyRates } from '../services/get-currency.service';
+import { sendTransactionsToSheet } from '../services/transactions-sheet.service';
+import { ITransaction } from '../common/interfaces/transactions';
 
 export async function handleIncomeConversation(ctx: MyContext) {
   // Steps -  ask_amount, ask_currency, ask_description,
@@ -114,16 +116,15 @@ export async function handleIncomeConfirmation(ctx: MyContext) {
     if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     const user = await UserModel.findOne({ userId: userId });
-    await Promise.all([
-      TransactionModel.create({
-        type: type,
-        amount: amount,
-        currency: currency,
-        exchangeRate: currencyRates.buyValue,
-        description: description,
-        createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
-      })
-    ]);
+    const transaction = await TransactionModel.create({
+      type: type,
+      amount: amount,
+      currency: currency,
+      exchangeRate: currencyRates.buyValue,
+      description: description,
+      createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
+    });
+    await sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction);
     userActions.data = rest;
     userActions.step = 'main_menu';
     await userActions.save();

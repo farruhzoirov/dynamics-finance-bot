@@ -10,6 +10,8 @@ import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { sendApprovalContractInfoToSheet } from '../../services/contracts-sheet.service';
 import { IApprovalContractPayload } from '../../common/interfaces/contract';
 import { UserModel } from '../../models/user.model';
+import { sendTransactionsToSheet } from '../../services/transactions-sheet.service';
+import { ITransaction } from '../../common/interfaces/transactions';
 
 export async function handleContractApproval(ctx: MyContext) {
   try {
@@ -132,7 +134,7 @@ export async function handleContractApproval(ctx: MyContext) {
         }
       }
     );
-    await TransactionModel.create({
+    const transaction = await TransactionModel.create({
       type: TransactionType.INCOME,
       amount: findContract.contractAmount,
       contractId: findContract.contractId,
@@ -142,7 +144,6 @@ export async function handleContractApproval(ctx: MyContext) {
       createdBy:
         `${findUser?.userFirstName || ''} ${findUser?.userLastName || ''}`.trim()
     });
-
     const sheetBody: IApprovalContractPayload = {
       uniqueId: findContract.uniqueId,
       contractId: findContract.contractId,
@@ -155,8 +156,10 @@ export async function handleContractApproval(ctx: MyContext) {
       directorAction: '✅',
       cashierAction: '✅'
     };
-
-    await sendApprovalContractInfoToSheet(ctx, sheetBody);
+    await Promise.all([
+      sendApprovalContractInfoToSheet(ctx, sheetBody),
+      sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
+    ]);
     await ctx.editMessageReplyMarkup(undefined);
   } catch (err) {
     console.error('Error in ApproveContract: Cashir', err);

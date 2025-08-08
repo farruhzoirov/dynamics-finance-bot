@@ -8,9 +8,13 @@ globalThis.FormData = FormData as any;
 globalThis.fetch = fetch as any;
 
 export type MyContext = Context;
+
 export const bot = new Bot<MyContext>(configEnv.TELEGRAM_BOT_TOKEN);
+
 import './commands/index';
+
 import { getCurrencyRates } from './services/get-currency.service';
+
 const startBot = async () => {
   await connectToDatabase();
   console.log('Connected to MongoDB successfully!');

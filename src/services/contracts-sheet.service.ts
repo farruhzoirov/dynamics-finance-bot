@@ -7,8 +7,9 @@ export async function sendApprovalContractInfoToSheet(
   body: IApprovalContractPayload
 ) {
   try {
+    body.sheetName = 'contracts';
     const response = await axios.post(
-      'https://script.google.com/macros/s/AKfycbyw4dVcXgVFf-R6iqfcl4pUT4Kt8uCw7ToL58gCO25xNJFXDnuL-bwdZTFJ-UfaNuDd-g/exec',
+      'https://script.google.com/macros/s/AKfycbwt4D9NW9EyWUsCQrbto7jI96Kzh4Nc8zhpOPwZVgbxx30Biw6EMC6nNPO591DWYDVyYQ/exec',
       body
     );
     if (response.data.result === 'success') return true;

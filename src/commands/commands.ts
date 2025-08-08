@@ -60,7 +60,9 @@ bot.callbackQuery(
 const AUTHORIZED_PHONES: Record<string, string> = {
   '+998975450409': UserRoles.manager,
   '+998999660913': UserRoles.director,
+  '+9989889930206': UserRoles.director,
   '+998910128811': UserRoles.cashier,
+  '+79872360420': UserRoles.cashier,
   '+998935847507': UserRoles.manager,
   '+998946564230': UserRoles.manager
 } as const;

@@ -1,9 +1,11 @@
 import { MyContext } from '../bot';
 import { Currency } from '../common/enums/currency.enum';
 import { TransactionType } from '../common/enums/transaction.enum';
+import { ITransaction } from '../common/interfaces/transactions';
 import { Languages } from '../common/types/languages';
 import { TransactionModel } from '../models/transaction.model';
 import { UserModel } from '../models/user.model';
+import { sendTransactionsToSheet } from '../services/transactions-sheet.service';
 import { getBalance } from './get-balance';
 
 export async function checkBalanceAndProceedTransaction(
@@ -33,7 +35,8 @@ export async function checkBalanceAndProceedTransaction(
           return false;
         }
         const balance = await getBalance(Currency.USD);
-        await Promise.all([
+
+        const [transaction1, transaction2] = await Promise.all([
           TransactionModel.create({
             contractId: contractId,
             type: type,
@@ -53,6 +56,10 @@ export async function checkBalanceAndProceedTransaction(
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           })
         ]);
+        await Promise.all([
+          sendTransactionsToSheet(ctx, transaction1.toObject() as ITransaction),
+          sendTransactionsToSheet(ctx, transaction2.toObject() as ITransaction)
+        ]);
       }
       if (currency === Currency.UZS) {
         const convertToUSD = difference / exchangeRate;
@@ -71,7 +78,7 @@ export async function checkBalanceAndProceedTransaction(
         ]);
         const diff = amount - balanceInSum.balance;
         const withDrawFromUSD = getBalanceInUSD.balance * exchangeRate - diff;
-        await Promise.all([
+        const [transaction1, transaction2, transaction3] = await Promise.all([
           TransactionModel.create({
             contractId: contractId,
             type: type,
@@ -100,10 +107,15 @@ export async function checkBalanceAndProceedTransaction(
             createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
           })
         ]);
+        await Promise.all([
+          sendTransactionsToSheet(ctx, transaction1.toObject() as ITransaction),
+          sendTransactionsToSheet(ctx, transaction2.toObject() as ITransaction),
+          sendTransactionsToSheet(ctx, transaction3.toObject() as ITransaction)
+        ]);
       }
       return true;
     } else {
-      await TransactionModel.create({
+      const transaction1 = await TransactionModel.create({
         type: type,
         contractId: contractId,
         amount: amount,
@@ -112,6 +124,10 @@ export async function checkBalanceAndProceedTransaction(
         description: description,
         createdBy: `${user?.userFirstName || ''} ${user?.userLastName || ''}`
       });
+      await sendTransactionsToSheet(
+        ctx,
+        transaction1.toObject() as ITransaction
+      );
       return true;
     }
   } catch (err) {
