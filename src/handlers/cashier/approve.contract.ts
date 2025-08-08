@@ -36,6 +36,21 @@ export async function handleContractApproval(ctx: MyContext) {
 
     if (!findContract) return await ctx.reply("Contract doesn't exist");
 
+    const isContractApproved = await ContractModel.findOne({
+      contractId: contractId,
+      status: ContractStatuses.APPROVED
+    });
+
+    if (isContractApproved) {
+      await ctx.editMessageReplyMarkup(undefined);
+      await ctx.reply(
+        findUserActions!.data.language === 'uz'
+          ? '‼️Shartnoma allaqachon tasdiqlangan'
+          : '‼️Договор уже утверждён'
+      );
+      return;
+    }
+
     const findManagerActions = await UserStepModel.findOne({
       userId: findContract?.managerUserId
     });

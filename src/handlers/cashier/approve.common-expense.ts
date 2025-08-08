@@ -38,12 +38,25 @@ export async function handleCommonExpenseApproval(ctx: MyContext) {
       UserStepModel.findOne({ userId: ctx.from?.id }),
       getCurrencyRates()
     ]);
-
     await ctx.answerCallbackQuery();
+
     if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     if (!commonExpense) {
       return await ctx.reply("CommonExpense doesn't exist.");
+    }
+    const isCommonExpenseApproved = await CommonExpenseModel.findOne({
+      uniqueId: uniqueId,
+      status: CommonExpenseStatuses.APPROVED
+    });
+    if (isCommonExpenseApproved) {
+      await ctx.editMessageReplyMarkup(undefined);
+      await ctx.reply(
+        findUserActions!.data.language === 'uz'
+          ? '‼️ Allaqachon tasdiqlangan'
+          : '‼️ Уже утверждён'
+      );
+      return;
     }
 
     const findManagerActions = await UserStepModel.findOne({
