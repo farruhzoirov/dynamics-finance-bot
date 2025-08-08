@@ -123,7 +123,7 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
           `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
           `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
           `👤 *Manager haqida ma'lumot:* ${findContract.info}\n` +
-          `📝 *Tavsif:* ${findContract.description}\n` +
+          `📝 *Shartnoma predmeti:* ${findContract.description}\n` +
           `${contractStatusText}\n\n` +
           `${statusSection}`
         : `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
@@ -133,7 +133,7 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
           `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
           `📅 *Дата договора:* ${findContract.contractDate}\n` +
           `👤 *Информация о менеджере:* ${findContract.info}\n` +
-          `📝 *Описание:* ${findContract.description}\n` +
+          `📝 *Предмет договора:* ${findContract.description}\n` +
           `${contractStatusText}\n\n` +
           `${statusSection}`;
 

@@ -78,7 +78,7 @@ export async function handleInProgressContractConfirmation(ctx: MyContext) {
 🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}
 📅 *Shartnoma sanasi:* ${findContract.contractDate}
 👤 *Manager haqida ma'lumot:* ${findContract.info}
-📝 *Tavsif:* ${findContract.description}
+📝 *Shartnoma predmeti:* ${findContract.description}
 
 ${statusSection}  
 
@@ -91,7 +91,7 @@ ${statusSection}
 🔁 *Курс обмена:* ${findContract.exchangeRate}
 📅 *Дата договора:* ${findContract.contractDate}
 👤 *Информация о менеджере:* ${findContract.info}
-📝 *Описание:* ${findContract.description}
+📝 *Предмет договора:* ${findContract.description}
 
 ${statusSection}
 `;

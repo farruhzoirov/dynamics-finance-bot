@@ -67,7 +67,7 @@ export async function handleContractApproval(ctx: MyContext) {
           `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
           `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
           `👤 *Manager haqida ma'lumot:* ${findContract.info}\n` +
-          `📝 *Tavsif:* ${findContract.description}\n\n` +
+          `📝 *Shartnoma predmeti:* ${findContract.description}\n\n` +
           `${statusSection}`
         : `📋 *Пожалуйста, подтвердите следующие данные:*\n` +
           `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
@@ -77,7 +77,7 @@ export async function handleContractApproval(ctx: MyContext) {
           `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
           `📅 *Дата договора:* ${findContract.contractDate}\n` +
           `👤 *Информация о менеджере:* ${findContract.info}\n` +
-          `📝 *Описание:* ${findContract.description}\n\n` +
+          `📝 *Предмет договора:* ${findContract.description}\n\n` +
           `${statusSection}`;
 
     await ctx.api.editMessageText(
@@ -109,7 +109,7 @@ export async function handleContractApproval(ctx: MyContext) {
               `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
               `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
               `👤 *Manager haqida ma'lumot:* ${findContract.info}\n` +
-              `📝 *Tavsif:* ${findContract.description}\n\n` +
+              `📝 *Shartnoma predmeti:* ${findContract.description}\n\n` +
               `✅ *Tasdiqlovchi direktor:* ${findDirectorActions?.directorName || 'Director'}\n` +
               `📅 *Tasdiqlangan vaqt:* ${actionDate}`
             : `📋 *Новый одобренный контракт:*\n` +
@@ -120,7 +120,7 @@ export async function handleContractApproval(ctx: MyContext) {
               `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
               `📅 *Дата договора:* ${findContract.contractDate}\n` +
               `👤 *Информация о менеджере:* ${findContract.info}\n` +
-              `📝 *Описание:* ${findContract.description}\n\n` +
+              `📝 *Предмет договора:* ${findContract.description}\n\n` +
               `✅ *Директор, одобривший договора:* ${findDirectorActions?.directorName || 'Director'}\n` +
               `📅 *Время одобрения:* ${actionDate}`;
 

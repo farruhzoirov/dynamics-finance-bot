@@ -148,8 +148,8 @@ bot.on('message:text', async (ctx) => {
 
     await ctx.reply(
       userActions?.data?.language === 'uz'
-        ? "Iltimos Managerning to'liq F.I.SH sini yoki shartnoma tuzilayotgan kompaniya yoki firma nomini kiriting :"
-        : 'Пожалуйста, введите полные Ф.И.О. менеджера или название компании (фирмы), с которой заключается договор :'
+        ? "Iltimos vergul bilan ajratib Managerning to'liq F.I.SH sini va shartnoma tuzilayotgan kompaniya yoki firma nomini kiriting :"
+        : 'Пожалуйста, через запятую введите полное Ф.И.О. менеджера и название компании или фирмы, с которой заключается договор:'
     );
 
     await UserStepModel.findOneAndUpdate(
@@ -181,8 +181,8 @@ bot.on('message:text', async (ctx) => {
 
     await ctx.reply(
       userActions?.data.language === 'uz'
-        ? 'Izoh kiriting :'
-        : 'Введите описание :'
+        ? 'Shartnoma predmetini kiriting :'
+        : '"Введите предмет договора":'
     );
 
     await UserStepModel.findOneAndUpdate(
@@ -278,7 +278,7 @@ bot.on('message:text', async (ctx) => {
 *🔁 Ayirboshlash kursi:* ${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, userActions.data.language)}
 *📅 Shartnoma sanasi:* ${userActions.data.contractDate}
 *👤 Manager haqida ma'lumot:* ${userActions.data.info}
-*📝 Tavsif:* ${userActions.data.description}
+*📝Shartnoma predmeti:* ${userActions.data.description}
 
 Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
         : `📋 *Пожалуйста, подтвердите следующие данные:*\n
@@ -289,7 +289,7 @@ Iltimos, ma'lumotlar to‘g‘riligini tasdiqlang.`
 *🔁 Курс обмена:* ${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, userActions.data.language)}
 *📅 Дата договора:* ${userActions.data.contractDate}
 *👤 Информация о менеджере:* ${userActions.data.info}
-*📝 Описание:* ${userActions.data.description}
+*📝 Предмет договора:* ${userActions.data.description}
 
 Пожалуйста, подтвердите правильность данных.`,
       {

@@ -100,6 +100,15 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
         : '💳 История транзакций',
       'transactions_page_1'
     )
+    .row()
+    .text(
+      `📝 ${
+        userActions.data?.language === 'uz'
+          ? 'Shartnoma yaratish'
+          : 'Создать договор'
+      }`,
+      'create_contract'
+    )
     .row();
   return keyboard;
 }

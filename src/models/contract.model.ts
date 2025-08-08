@@ -15,8 +15,8 @@ const ContractSchema = new Schema(
     description: { type: String, required: true },
     status: { type: String, enum: ContractStatuses, required: true },
 
-    managerConfirmationMessageId: { type: Number, required: true },
-    managerUserId: { type: Number, required: true }
+    managerConfirmationMessageId: { type: Number, default: null },
+    managerUserId: { type: Number, default: null }
   },
   {
     timestamps: true

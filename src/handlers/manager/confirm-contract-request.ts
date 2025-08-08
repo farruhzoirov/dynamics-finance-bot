@@ -8,13 +8,21 @@ import { ContractStatuses } from '../../common/enums/contract-status.enum';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { RemainingContractFields } from '../../common/types/contract';
 import { getCurrencyRates } from '../../services/get-currency.service';
+import { UserRoles } from '../../common/enums/roles.enum';
+import { IApprovalContractPayload } from '../../common/interfaces/contract';
+import { sendApprovalContractInfoToSheet } from '../../services/contracts-sheet.service';
+import { sendTransactionsToSheet } from '../../services/transactions-sheet.service';
+import { TransactionType } from '../../common/enums/transaction.enum';
+import { ITransaction } from '../../common/interfaces/transactions';
+import { TransactionModel } from '../../models/transaction.model';
 
 export async function handleContractRequestConfirmation(ctx: MyContext) {
   try {
     const userId = ctx!.from!.id;
     if (!userId || !ctx.match) return;
 
-    const [userActions, directors, currencyRates] = await Promise.all([
+    const [user, userActions, directors, currencyRates] = await Promise.all([
+      UserModel.findOne({ userId: userId }),
       UserStepModel.findOne({ userId }),
       UserModel.find({ role: 'director' }),
       getCurrencyRates()
@@ -24,13 +32,74 @@ export async function handleContractRequestConfirmation(ctx: MyContext) {
 
     if (!userActions?.data) return;
     if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
-
     if (!directors.length) {
       return await ctx.reply('Directors not found.');
     }
     await ctx.editMessageReplyMarkup(undefined);
-
     const lang = userActions.data.language;
+    if (user!.role === UserRoles.cashier) {
+      const createdContract = await ContractModel.create({
+        uniqueId: userActions.data.uniqueId,
+        contractId: userActions.data.contractId,
+        contractAmount: userActions.data.contractAmount,
+        currency: userActions.data.currency,
+        exchangeRate: currencyRates.buyValue,
+        contractDate: userActions.data.contractDate,
+        info: userActions.data.info,
+        description: userActions.data.description,
+        status: ContractStatuses.APPROVED
+      });
+      const sheetBody: IApprovalContractPayload = {
+        uniqueId: createdContract.uniqueId,
+        contractId: createdContract.contractId,
+        contractAmount: createdContract.contractAmount,
+        currency: createdContract.currency,
+        exchangeRate: createdContract.exchangeRate,
+        contractDate: createdContract.contractDate,
+        info: createdContract.info,
+        description: createdContract.description,
+        directorAction: '',
+        cashierAction: '✅'
+      };
+
+      const transaction = await TransactionModel.create({
+        type: TransactionType.INCOME,
+        amount: createdContract.contractAmount,
+        contractId: createdContract.contractId,
+        currency: createdContract.currency,
+        exchangeRate: createdContract.exchangeRate,
+        description: createdContract.description,
+        createdBy:
+          `${user?.userFirstName || ''} ${user?.userLastName || ''}`.trim()
+      });
+
+      await Promise.all([
+        sendApprovalContractInfoToSheet(ctx, sheetBody),
+        sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
+      ]);
+
+      const {
+        uniqueId,
+        contractId,
+        contractAmount,
+        contractDate,
+        currency,
+        info,
+        description,
+        managerConfirmationMessageId,
+        ...remainingData
+      } = userActions.data;
+
+      userActions.data = remainingData as RemainingContractFields;
+      userActions.markModified('data');
+      await userActions.save();
+
+      return await ctx.reply(
+        userActions.data.language === 'uz'
+          ? '✅ Shartnoma muvaffaqiyatli yaratildi.'
+          : '✅ Договор успешно создан.'
+      );
+    }
 
     // 1. Save contract
     await ContractModel.create({
