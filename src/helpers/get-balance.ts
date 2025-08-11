@@ -4,7 +4,7 @@ import { TransactionType } from '../common/enums/transaction.enum';
 export async function getBalance(currency: string) {
   const result = await TransactionModel.aggregate([
     {
-      $match: { currency: currency }
+      $match: { currency }
     },
     {
       $group: {
@@ -27,7 +27,7 @@ export async function getBalance(currency: string) {
         expenseTotal: {
           $sum: {
             $cond: [
-              { $eq: ['$_id', TransactionType.EXPENSE] },
+              { $ne: ['$_id', TransactionType.INCOME] },
               '$totalAmount',
               0
             ]
@@ -35,7 +35,6 @@ export async function getBalance(currency: string) {
         }
       }
     },
-    // Project the final result with the balance calculation
     {
       $project: {
         _id: 0,
