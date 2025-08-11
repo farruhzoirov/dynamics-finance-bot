@@ -206,8 +206,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
 
     const text =
       userActions.data.language === 'uz'
-        ? `✅ *Ma'lumotlar qabul qilindi!*\n\n*📄 Tavsif:* ${commonExpenseDescription}\n*💵 Miqdor:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Chiqim turi:* ${expenseTypeLabel}\n*👤 Manager:* ${managerInfo}\n${contractBasedText}\n\nTasdiqlaysizmi?`
-        : `✅ *Данные получены!*\n\n*📄 Описание:* ${commonExpenseDescription}\n*💵 Сумма:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Тип расхода:* ${expenseTypeLabel}\n*👤 Менеджер:* ${managerInfo}\n${contractBasedText}\n\nХотите подтвердить?`;
+        ? `✅ *Ma'lumotlar qabul qilindi!*\n\n*📄 Tavsif:* ${commonExpenseDescription}\n*💵 Miqdor:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Chiqim turi:* ${expenseTypeLabel}\n*👤 Shaxs ma'lumoti:* ${managerInfo}\n${contractBasedText}\n\nTasdiqlaysizmi?`
+        : `✅ *Данные получены!*\n\n*📄 Описание:* ${commonExpenseDescription}\n*💵 Сумма:* ${formatAmountByCurrency(commonExpenseAmount, commonExpenseCurrency, userActions.data.language)} \n*🏷 Тип расхода:* ${expenseTypeLabel}\n*👤 Личные данные:* ${managerInfo}\n${contractBasedText}\n\nХотите подтвердить?`;
 
     const commonExpenseConfirmationMessage = await ctx.reply(text, {
       reply_markup: confirmIncomeKeyboard,
