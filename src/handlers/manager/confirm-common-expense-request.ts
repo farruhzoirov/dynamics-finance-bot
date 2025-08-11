@@ -12,6 +12,9 @@ import { Languages } from '../../common/types/languages';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { TransactionType } from '../../common/enums/transaction.enum';
 import { getCurrencyRates } from '../../services/get-currency.service';
+import { checkBalanceAndProceedTransaction } from '../../helpers/check-balance';
+import { getBalance } from '../../helpers/get-balance';
+import { Currency } from '../../common/enums/currency.enum';
 
 export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
   try {
@@ -21,17 +24,76 @@ export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
     const uniqueId = parseInt(ctx.match[1]);
     const commonExpenseType = ctx.match[2] as TransactionType;
     const contractId = ctx.match[3] ? parseInt(ctx.match[3]) : null;
-    const [userActions, findDirectors, currencyRates] = await Promise.all([
-      UserStepModel.findOne({ userId: userId }),
-      UserModel.find({ role: UserRoles.director }),
-      getCurrencyRates()
-    ]);
+    const [user, userActions, findDirectors, currencyRates] = await Promise.all(
+      [
+        UserModel.findOne({ userId: userId }),
+        UserStepModel.findOne({ userId: userId }),
+        UserModel.find({ role: UserRoles.director }),
+        getCurrencyRates()
+      ]
+    );
 
     if (!userActions) return;
     if (!findDirectors.length) return await ctx.reply("Directors don't exist");
     if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     await ctx.answerCallbackQuery();
+
+    if (user?.role === UserRoles.cashier) {
+      const {
+        type,
+        expenseType,
+        commonExpenseAmount,
+        commonExpenseCurrency,
+        managerInfo,
+        commonExpenseDescription,
+        commonExpenseConfirmationMessageId,
+        ...rest
+      } = userActions.data;
+
+      await CommonExpenseModel.create({
+        uniqueId,
+        contractId: contractId,
+        expenseType: commonExpenseType,
+        amount: commonExpenseAmount,
+        currency: commonExpenseCurrency,
+        exchangeRate: currencyRates.saleValue,
+        managerInfo,
+        description: commonExpenseDescription,
+        status: CommonExpenseStatuses.APPROVED,
+        managerConfirmationMessageId: commonExpenseConfirmationMessageId,
+        managerUserId: userId
+      });
+
+      const balance = await getBalance(
+        commonExpenseCurrency === Currency.USD ? Currency.USD : Currency.UZS
+      );
+
+      const transaction = await checkBalanceAndProceedTransaction(
+        ctx,
+        balance.balance,
+        commonExpenseAmount,
+        currencyRates.saleValue,
+        commonExpenseCurrency,
+        userActions!.data!.language,
+        expenseType,
+        commonExpenseDescription,
+        contractId
+      );
+
+      if (transaction) {
+        userActions.data = rest;
+        userActions.markModified('data');
+        await userActions.save();
+        await ctx.editMessageReplyMarkup(undefined);
+
+        return await ctx.reply(
+          userActions.data.language === 'uz'
+            ? '✅ Chiqim muvaffaqiyatli amalga oshdi'
+            : '✅ Расход успешно выполнен'
+        );
+      }
+    }
 
     const {
       type,

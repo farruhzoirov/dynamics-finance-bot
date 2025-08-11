@@ -19,6 +19,8 @@ import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { CashierActionModel } from '../../models/cashier-actions.model';
 import { handleTransactionsHistory } from '../../handlers/director/transactions-history';
+import { getContractDynamicText } from '../../helpers/dynamics-text';
+import { ContractStatuses } from '../../common/enums/contract-status.enum';
 
 bot.callbackQuery(
   /^director_in_progress:(.+)$/,
@@ -75,20 +77,11 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
 
     const id = parseInt(searchText, 10);
     const findContract = await ContractModel.findOne({
-      $or: [
-        {
-          contractId: id
-        },
-        {
-          uniqueId: id
-        }
-      ]
+      $or: [{ contractId: id }, { uniqueId: id }],
+      status: { $in: [ContractStatuses.APPROVED, ContractStatuses.CLOSED] }
     });
 
     if (!findContract) {
-      userActions.step = 'main_menu';
-      userActions.markModified('step');
-      await userActions.save();
       return await ctx.reply(
         lang === 'uz' ? 'Shartnoma mavjud emas!' : 'Контракт не найдено!'
       );
@@ -108,34 +101,18 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
       lang === 'uz' ? 'Kassir tasdiqlagan' : 'Кассир одобрил';
 
     const contractStatusText = getStatusText(findContract.status, lang);
-
     const statusSection =
       lang === 'uz'
         ? `🔔 *Director harakati:*\n${statusEmoji} *Status:* ${statusText}\n📅 *Vaqt:* ${findDirectorActions?.actionDate || "Noma'lum"}\n👤 *Director:* ${findDirectorActions?.directorName || 'Director'}\n\n🔔 *Kassir harakati:*\n${cashierStatusEmoji} *Status:* ${cashierStatusText}\n📅 *Vaqt:* ${findCashierActions?.actionDate || "Noma'lum"}\n 👤 *Kassir:* ${findCashierActions?.cashierName || 'Cashier'} `
         : `🔔 *Действие директора:*\n${statusEmoji} *Статус:* ${statusText}\n📅 *Время:* ${findDirectorActions?.actionDate || 'Неизвестно'}\n👤 *Директор:* ${findDirectorActions?.directorName || 'Director'}\n\n🔔 *Действие кассира:*\n${cashierStatusEmoji} *Статус:* ${cashierStatusText}\n📅 *Время:* ${findCashierActions?.actionDate || 'Неизвестно'}\n 👤 *Кассир:* ${findCashierActions?.cashierName || 'Cashier'}`;
 
-    const text =
-      lang === 'uz'
-        ? `🆔 *Unikal ID:* ${findContract.uniqueId}\n` +
-          `📄 *Shartnoma raqami:* ${findContract.contractId}\n` +
-          `💰 *Shartnoma summasi:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, lang)}\n` +
-          `💱 *Valyuta:* ${findContract.currency}\n` +
-          `🔁 *Ayirboshlash kursi:* ${findContract.exchangeRate}\n` +
-          `📅 *Shartnoma sanasi:* ${findContract.contractDate}\n` +
-          `👤 *Manager haqida ma'lumot:* ${findContract.info}\n` +
-          `📝 *Shartnoma predmeti:* ${findContract.description}\n` +
-          `${contractStatusText}\n\n` +
-          `${statusSection}`
-        : `🆔 *Уникальный ID:* ${findContract.uniqueId}\n` +
-          `📄 *Номер договора:* ${findContract.contractId}\n` +
-          `💰 *Сумма договора:* ${formatAmountByCurrency(findContract.contractAmount, findContract.currency, lang)}\n` +
-          `💱 *Валюта:* ${findContract.currency}\n` +
-          `🔁 *Курс обмена:* ${findContract.exchangeRate}\n` +
-          `📅 *Дата договора:* ${findContract.contractDate}\n` +
-          `👤 *Информация о менеджере:* ${findContract.info}\n` +
-          `📝 *Предмет договора:* ${findContract.description}\n` +
-          `${contractStatusText}\n\n` +
-          `${statusSection}`;
+    const text = getContractDynamicText(
+      findContract,
+      lang,
+      contractStatusText,
+      statusSection,
+      false
+    );
 
     await ctx.reply(text, {
       parse_mode: 'Markdown'

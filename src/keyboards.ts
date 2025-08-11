@@ -91,14 +91,31 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
     )
     .row()
     .text(
+      userActions.data?.language === 'uz' ? '🏢 Office' : '🏢 Офис',
+      'office'
+    )
+    .text(userActions.data?.language === 'uz' ? '👥 Ulush' : '👥 Доля', 'share')
+    .row()
+    .text(
+      userActions.data?.language === 'uz' ? '💵 Avans' : '💵 Аванс',
+      'advance'
+    )
+    .text(
       userActions.data.language === 'uz' ? '💸 Chiqim' : '💸 Расход',
       'expense'
     )
+    .row()
     .text(
       userActions.data?.language === 'uz'
         ? '💳 Tranzaksiyalar tarixi'
         : '💳 История транзакций',
       'transactions_page_1'
+    )
+    .text(
+      userActions.data?.language === 'uz'
+        ? "💸 Shartnoma bo'yicha xarajat"
+        : '💸 Расход по договору',
+      'contract_expense'
     )
     .row()
     .text(
@@ -108,6 +125,10 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
           : 'Создать договор'
       }`,
       'create_contract'
+    )
+    .text(
+      userActions.data?.language === 'uz' ? '📋 Shartnomalar' : '📋 Договори',
+      'contracts_director'
     )
     .row();
   return keyboard;

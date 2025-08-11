@@ -128,8 +128,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
 
     await ctx.reply(
       userActions?.data?.language === 'uz'
-        ? "Iltimos Managerning to'liq F.I.SH sini  kiriting :"
-        : 'Пожалуйста, введите полные Ф.И.О. менеджера :'
+        ? "Iltimos to'liq F.I.SHni  kiriting :"
+        : 'Пожалуйста, введите полные Ф.И.О. :'
     );
 
     await UserStepModel.findOneAndUpdate(
