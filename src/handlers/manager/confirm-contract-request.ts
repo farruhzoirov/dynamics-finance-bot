@@ -2,7 +2,6 @@ import { InlineKeyboard } from 'grammy';
 import { MyContext } from '../../bot';
 import { UserStepModel } from '../../models/user-step.model';
 import { UserModel } from '../../models/user.model';
-import { getCurrency } from '../../helpers/get-currency';
 import { ContractModel } from '../../models/contract.model';
 import { ContractStatuses } from '../../common/enums/contract-status.enum';
 import { DirectorActionModel } from '../../models/director-actions.model';
@@ -11,10 +10,6 @@ import { getCurrencyRates } from '../../services/get-currency.service';
 import { UserRoles } from '../../common/enums/roles.enum';
 import { IApprovalContractPayload } from '../../common/interfaces/contract';
 import { sendApprovalContractInfoToSheet } from '../../services/contracts-sheet.service';
-import { sendTransactionsToSheet } from '../../services/transactions-sheet.service';
-import { TransactionType } from '../../common/enums/transaction.enum';
-import { ITransaction } from '../../common/interfaces/transactions';
-import { TransactionModel } from '../../models/transaction.model';
 
 export async function handleContractRequestConfirmation(ctx: MyContext) {
   try {
@@ -62,20 +57,20 @@ export async function handleContractRequestConfirmation(ctx: MyContext) {
         cashierAction: '✅'
       };
 
-      const transaction = await TransactionModel.create({
-        type: TransactionType.INCOME,
-        amount: createdContract.contractAmount,
-        contractId: createdContract.contractId,
-        currency: createdContract.currency,
-        exchangeRate: createdContract.exchangeRate,
-        description: createdContract.description,
-        createdBy:
-          `${user?.userFirstName || ''} ${user?.userLastName || ''}`.trim()
-      });
+      // const transaction = await TransactionModel.create({
+      //   type: TransactionType.INCOME,
+      //   amount: createdContract.contractAmount,
+      //   contractId: createdContract.contractId,
+      //   currency: createdContract.currency,
+      //   exchangeRate: createdContract.exchangeRate,
+      //   description: createdContract.description,
+      //   createdBy:
+      //     `${user?.userFirstName || ''} ${user?.userLastName || ''}`.trim()
+      // });
 
       await Promise.all([
-        sendApprovalContractInfoToSheet(ctx, sheetBody),
-        sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
+        sendApprovalContractInfoToSheet(ctx, sheetBody)
+        // sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
       ]);
 
       const {
