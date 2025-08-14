@@ -6,7 +6,6 @@ import { checkBalanceAndProceedTransaction } from '../../helpers/check-balance';
 import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { getBalance } from '../../helpers/get-balance';
 import { getExpenseTypeLabel } from '../../helpers/get-common-expense-translations';
-import { getCurrency } from '../../helpers/get-currency';
 import { CashierActionModel } from '../../models/cashier-actions.model';
 import { CommonExpenseModel } from '../../models/common-expenses.model';
 import { DirectorActionModel } from '../../models/director-actions.model';

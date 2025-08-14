@@ -149,16 +149,16 @@ export async function handleContractApproval(ctx: MyContext) {
         }
       }
     );
-    const transaction = await TransactionModel.create({
-      type: TransactionType.INCOME,
-      amount: findContract.contractAmount,
-      contractId: findContract.contractId,
-      currency: findContract.currency,
-      exchangeRate: findContract.exchangeRate,
-      description: findContract.description,
-      createdBy:
-        `${findUser?.userFirstName || ''} ${findUser?.userLastName || ''}`.trim()
-    });
+    // const transaction = await TransactionModel.create({
+    //   type: TransactionType.INCOME,
+    //   amount: findContract.contractAmount,
+    //   contractId: findContract.contractId,
+    //   currency: findContract.currency,
+    //   exchangeRate: findContract.exchangeRate,
+    //   description: findContract.description,
+    //   createdBy:
+    //     `${findUser?.userFirstName || ''} ${findUser?.userLastName || ''}`.trim()
+    // });
     const sheetBody: IApprovalContractPayload = {
       uniqueId: findContract.uniqueId,
       contractId: findContract.contractId,
@@ -172,8 +172,8 @@ export async function handleContractApproval(ctx: MyContext) {
       cashierAction: '✅'
     };
     await Promise.all([
-      sendApprovalContractInfoToSheet(ctx, sheetBody),
-      sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
+      sendApprovalContractInfoToSheet(ctx, sheetBody)
+      // sendTransactionsToSheet(ctx, transaction.toObject() as ITransaction)
     ]);
     await ctx.editMessageReplyMarkup(undefined);
   } catch (err) {
