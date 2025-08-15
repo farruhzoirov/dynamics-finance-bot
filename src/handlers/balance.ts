@@ -67,7 +67,7 @@ export async function getBalanceHandler(ctx: MyContext) {
   return ctx.reply(
     `💳 *Ваш текущий баланс:*\n\n` +
       `🇺🇸 Доллары США: *${formatAmountByCurrency(balanceInUSD.balance, Currency.USD, 'ru')}*\n` +
-      `🇺🇿 Сум: *${formatAmountByCurrency(balanceInUSD.balance, Currency.USD, 'ru')}*\n` +
+      `🇺🇿 Сум: *${formatAmountByCurrency(balanceUZS.balance, Currency.UZS, 'ru')}*\n` +
       `Курс покупки доллара США (Капиталбанк): *${formatAmountByCurrency(currencyRates.buyValue, Currency.UZS, lang)}*\n` +
       `Курс продажи доллара США (Капиталбанк): *${formatAmountByCurrency(currencyRates.saleValue, Currency.UZS, lang)}*\n\n` +
       `📌 Это ваш текущий остаток на счету. Перед выполнением операций или транзакций рекомендуем проверить баланс.`,

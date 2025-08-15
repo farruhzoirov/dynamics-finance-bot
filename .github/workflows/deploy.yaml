@@ -44,7 +44,8 @@ jobs:
             MONGODB_URI=${{ secrets.MONGODB_URI }}
             EOL
 
-            pm2 reload dynamics-finance-bot
+            pm2 start dist/bot.js
+            pm2 reload bot
             # pm2 stop dynamics-finance-bot || true
             # pm2 start dist/bot.js --name dynamics-finance-bot
-            # pm2 save
+            pm2 save

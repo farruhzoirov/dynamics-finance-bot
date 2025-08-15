@@ -69,7 +69,14 @@ const AUTHORIZED_PHONES: Record<string, string> = {
 
 bot.on('message:contact', async (ctx, next: NextFunction) => {
   const phoneNumber = ctx.message.contact.phone_number;
-  if (!phoneNumber || !Object.keys(AUTHORIZED_PHONES).includes(phoneNumber)) {
+
+  console.log(Object.keys(AUTHORIZED_PHONES));
+  if (
+    !phoneNumber ||
+    !Object.keys(AUTHORIZED_PHONES).includes(
+      phoneNumber.length === 13 ? phoneNumber : `+${phoneNumber}`
+    )
+  ) {
     await ctx.reply(`Please contact with adminstrator.`);
     return;
   }
