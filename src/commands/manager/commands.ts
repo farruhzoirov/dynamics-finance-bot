@@ -25,6 +25,7 @@ bot.callbackQuery(
     'share',
     'advance',
     'income',
+    'debt',
     'expense_purchase',
     'expense_logistics',
     'expense_certificates',

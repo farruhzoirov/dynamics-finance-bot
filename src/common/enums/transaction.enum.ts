@@ -4,6 +4,7 @@ export enum TransactionType {
   SHARE = 'share',
   ADVANCE = 'advance',
   INCOME = 'income',
+  DEBT = 'debt',
   EXPENSE_PURCHASE = 'expense_purchase',
   EXPENSE_LOGISTICS = 'expense_logistics',
   EXPENSE_CERTIFICATES = 'expense_certificates',

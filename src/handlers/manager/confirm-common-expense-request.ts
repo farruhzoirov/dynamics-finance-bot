@@ -19,11 +19,11 @@ import { Currency } from '../../common/enums/currency.enum';
 export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
   try {
     const userId = ctx!.from!.id;
-    console.log(ctx.match);
     if (!ctx.match) return;
     const uniqueId = parseInt(ctx.match[1]);
     const commonExpenseType = ctx.match[2] as TransactionType;
-    const contractId = ctx.match[3] ? parseInt(ctx.match[3]) : null;
+    const raw = ctx.match?.[3];
+    const contractId = raw && raw !== 'null' ? parseInt(raw, 10) : null;
     const [user, userActions, findDirectors, currencyRates] = await Promise.all(
       [
         UserModel.findOne({ userId: userId }),
@@ -38,6 +38,8 @@ export async function handleCommonExpenseRequestConfirmation(ctx: MyContext) {
     if (!currencyRates) return await ctx.reply('Error in getCurrencyRates');
 
     await ctx.answerCallbackQuery();
+
+    console.log(contractId);
 
     if (user?.role === UserRoles.cashier) {
       const {

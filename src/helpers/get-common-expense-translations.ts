@@ -16,7 +16,8 @@ export const expenseTypeTranslations: Record<
     [TransactionType.EXPENSE_CERTIFICATES]: 'Sertifikat xarajatlari',
     [TransactionType.EXPENSE_OTHER]: 'Boshqa xarajatlar',
     [TransactionType.EXPENSE_BONUS]: "Bonus to'lovi",
-    [TransactionType.EXPENSE_MANAGER_SHARE]: 'Menejer ulushi'
+    [TransactionType.EXPENSE_MANAGER_SHARE]: 'Menejer ulushi',
+    [TransactionType.DEBT]: 'Qarz'
   },
   ru: {
     [TransactionType.INCOME]: 'Доход',
@@ -29,7 +30,8 @@ export const expenseTypeTranslations: Record<
     [TransactionType.EXPENSE_CERTIFICATES]: 'Расходы на сертификаты',
     [TransactionType.EXPENSE_OTHER]: 'Прочие расходы',
     [TransactionType.EXPENSE_BONUS]: 'Выплата бонуса',
-    [TransactionType.EXPENSE_MANAGER_SHARE]: 'Доля менеджера'
+    [TransactionType.EXPENSE_MANAGER_SHARE]: 'Доля менеджера',
+    [TransactionType.DEBT]: 'Долг'
   }
 };
 

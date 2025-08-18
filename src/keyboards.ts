@@ -37,6 +37,7 @@ export function getMainMenuKeyboardForManager(userActions: any) {
       userActions.data?.language === 'uz' ? '📋 Shartnomalar' : '📋 Договори',
       'contracts_director'
     )
+    .text(userActions.data?.language === 'uz' ? '💰 Qarz' : '💰 Долг', 'debt')
     .row();
 
   return keyboard;
@@ -130,7 +131,8 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
       userActions.data?.language === 'uz' ? '📋 Shartnomalar' : '📋 Договори',
       'contracts_director'
     )
-    .row();
+    .row()
+    .text(userActions.data?.language === 'uz' ? '💰 Qarz' : '💰 Долг', 'debt');
   return keyboard;
 }
 
