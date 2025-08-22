@@ -70,7 +70,7 @@ export function getMainMenuKeyboardForDirector(userActions: any) {
       userActions.data?.language === 'uz'
         ? '💳 Tranzaksiyalar tarixi'
         : '💳 История транзакций',
-      'transactions_page_1'
+      'tx_all_1'
     );
 
   return keyboard;
@@ -110,7 +110,7 @@ export function getMainMenuKeyboardForCashier(userActions: any) {
       userActions.data?.language === 'uz'
         ? '💳 Tranzaksiyalar tarixi'
         : '💳 История транзакций',
-      'transactions_page_1'
+      'tx_all_1'
     )
     .text(
       userActions.data?.language === 'uz'

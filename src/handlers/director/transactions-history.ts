@@ -1,29 +1,54 @@
 import { MyContext } from '../../bot';
+import { TransactionType } from '../../common/enums/transaction.enum';
 import { Languages } from '../../common/types/languages';
 import { getExpenseTypeLabel } from '../../helpers/get-common-expense-translations';
 import { TransactionModel } from '../../models/transaction.model';
 import { UserStepModel } from '../../models/user-step.model';
 
-export async function handleTransactionsHistory(ctx: MyContext, page: number) {
+type Btn = { text: string; callback_data: string };
+type Keyboard = Btn[][];
+type TxFilter = 'all' | 'income' | 'expense';
+
+export async function handleTransactionsHistory(
+  ctx: MyContext,
+  page = 1,
+  filterType: TxFilter = 'all'
+) {
   try {
     const userId = ctx.from!.id;
     const limit = 5;
     const skip = limit * (page - 1);
 
+    let filter: Record<string, any> = {};
+    if (filterType === 'income') {
+      filter = { type: TransactionType.INCOME };
+    } else if (filterType === 'expense') {
+      filter = { type: { $ne: TransactionType.INCOME } };
+    }
+
     const [userActions, transactions, transactionsCount] = await Promise.all([
       UserStepModel.findOne({ userId }),
-      TransactionModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
-      TransactionModel.countDocuments()
+      TransactionModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      TransactionModel.countDocuments(filter)
     ]);
 
     await ctx.answerCallbackQuery();
 
-    const language = userActions?.data.language || 'ru';
+    const language = (userActions?.data.language as Languages) || 'ru';
     const isUzbek = language === 'uz';
 
     if (!transactions.length) {
-      return ctx.reply(
-        isUzbek ? 'Tranzaksiyalar mavjud emas.' : 'Транзакции не найдены.'
+      return ctx.editMessageText(
+        isUzbek ? 'Tranzaksiyalar topilmadi.' : 'Транзакции не найдены.',
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: getPaginationButtons(page, 0, language, filterType)
+          }
+        }
       );
     }
 
@@ -63,12 +88,15 @@ export async function handleTransactionsHistory(ctx: MyContext, page: number) {
       ? `💳 *Tranzaksiyalar tarixi* (${page}-chi sahifa):\n\n`
       : `💳 *История транзакций* (${page}-я страница):\n\n`;
 
-    const paginationButtons = getPaginationButtons(page, totalPages, language);
-
     await ctx.editMessageText(messageHeader + lines.join('\n\n'), {
       parse_mode: 'Markdown',
       reply_markup: {
-        inline_keyboard: [paginationButtons]
+        inline_keyboard: getPaginationButtons(
+          page,
+          totalPages,
+          language,
+          filterType
+        )
       }
     });
   } catch (err) {
@@ -79,34 +107,57 @@ export async function handleTransactionsHistory(ctx: MyContext, page: number) {
 function getPaginationButtons(
   currentPage: number,
   totalPages: number,
-  lang: Languages
-) {
+  lang: Languages,
+  filterType: TxFilter
+): Keyboard {
   const maxVisiblePages = 5;
-  const buttons = [];
+
+  const topRows: Btn[] = [
+    {
+      text: lang === 'uz' ? 'Hammasi' : 'Все',
+      callback_data: `tx_all_1`
+    },
+    {
+      text: lang === 'uz' ? 'Kirimlar' : 'Доходы',
+      callback_data: `tx_income_1`
+    },
+    {
+      text: lang === 'uz' ? 'Chiqimlar' : 'Расходы',
+      callback_data: `tx_expense_1`
+    }
+  ];
+
+  const keyboards: Keyboard = [topRows];
+
+  const paginationRow: Btn[] = [];
 
   const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-  const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+  const endPage = Math.min(totalPages || 1, startPage + maxVisiblePages - 1);
 
   if (currentPage > 1) {
-    buttons.push({
+    paginationRow.push({
       text: lang === 'uz' ? '⬅️ Oldingi' : '⬅️ Назад',
-      callback_data: `transactions_page_${currentPage - 1}`
+      callback_data: `tx_${filterType}_${currentPage - 1}`
     });
   }
 
   for (let i = startPage; i <= endPage; i++) {
-    buttons.push({
-      text: `${i}`,
-      callback_data: `transactions_page_${i}`
+    paginationRow.push({
+      text: `${i}${i === currentPage ? ' •' : ''}`,
+      callback_data: `tx_${filterType}_${i}`
     });
   }
 
   if (currentPage < totalPages) {
-    buttons.push({
+    paginationRow.push({
       text: lang === 'uz' ? 'Keyingi ➡️' : 'Далее ➡️',
-      callback_data: `transactions_page_${currentPage + 1}`
+      callback_data: `tx_${filterType}_${currentPage + 1}`
     });
   }
 
-  return buttons;
+  if (paginationRow.length) {
+    keyboards.push(paginationRow);
+  }
+
+  return keyboards;
 }

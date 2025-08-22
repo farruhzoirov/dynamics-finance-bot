@@ -15,12 +15,13 @@ import { handleSearchingContracts } from '../../handlers/director/search-contrac
 import { NextFunction } from 'grammy';
 import { UserStepModel } from '../../models/user-step.model';
 import { ContractModel } from '../../models/contract.model';
-import { formatAmountByCurrency } from '../../helpers/format-amount';
 import { DirectorActionModel } from '../../models/director-actions.model';
 import { CashierActionModel } from '../../models/cashier-actions.model';
 import { handleTransactionsHistory } from '../../handlers/director/transactions-history';
 import { getContractDynamicText } from '../../helpers/dynamics-text';
 import { ContractStatuses } from '../../common/enums/contract-status.enum';
+
+type TxFilter = 'all' | 'income' | 'expense';
 
 bot.callbackQuery(
   /^director_in_progress:(.+)$/,
@@ -46,11 +47,21 @@ bot.callbackQuery(
 
 bot.callbackQuery('balance', getBalanceHandler);
 
-bot.callbackQuery(/^transactions_page_(\d+)$/, async (ctx) => {
-  console.log('ok');
-  const page = parseInt(ctx.match![1]);
-  await handleTransactionsHistory(ctx, page);
+bot.callbackQuery(/^tx_(all|income|expense)_(\d+)$/, async (ctx) => {
+  const filter = ctx.match![1] as TxFilter;
+  const page = parseInt(ctx.match![2], 10);
+  await handleTransactionsHistory(ctx, page, filter);
 });
+
+bot.callbackQuery(
+  ['transaction_income', 'transaction_expense'],
+  async (ctx) => {
+    const data = ctx.callbackQuery!.data!;
+    const filter: TxFilter =
+      data === 'transaction_income' ? 'income' : 'expense';
+    await handleTransactionsHistory(ctx, 1, filter);
+  }
+);
 
 bot.callbackQuery('contracts_director', handleGettingContracts);
 
