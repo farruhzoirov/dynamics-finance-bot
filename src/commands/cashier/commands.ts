@@ -51,8 +51,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
       if (!isNumeric) {
         return await ctx.reply(
           lang === 'uz'
-            ? 'Iltimos, to‘g‘ri formatda shartnoma raqami yoki unikal Idsini kiriting. (Masalan: 1000 yoki 12)'
-            : 'Пожалуйста, введите номер контракта или уникальный ID в правильном формате. (например: 1000 или 12).'
+            ? 'Iltimos, to‘g‘ri formatda shartnoma raqamini kiriting. (Masalan: 1000 yoki 12)'
+            : 'Пожалуйста, введите номер контракта  в правильном формате. (например: 1000 или 12).'
         );
       }
       const id = parseInt(contractId, 10);
@@ -74,7 +74,7 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
       }
 
       const isContractClosed = await ContractModel.findOne({
-        $or: [{ contractId: id }, { uniqueId: id }],
+        $or: [{ contractId: id }],
         status: ContractStatuses.CLOSED
       });
 
