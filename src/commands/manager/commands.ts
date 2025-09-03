@@ -236,8 +236,8 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
     if (!isNumeric) {
       return await ctx.reply(
         lang === 'uz'
-          ? 'Iltimos, to‘g‘ri formatda shartnoma raqami yoki unikal Idsini kiriting. (Masalan: 1000 yoki 12)'
-          : 'Пожалуйста, введите номер контракта или уникальный ID в правильном формате. (например: 1000 или 12).'
+          ? 'Iltimos, to‘g‘ri formatda shartnoma raqamini kiriting. (Masalan: 1000 yoki 12)'
+          : 'Пожалуйста, введите номер контракта  в правильном формате. (например: 1000 или 12).'
       );
     }
 
@@ -246,9 +246,6 @@ bot.on('message:text', async (ctx: MyContext, next: NextFunction) => {
       $or: [
         {
           contractId: id
-        },
-        {
-          uniqueId: id
         }
       ]
     });
