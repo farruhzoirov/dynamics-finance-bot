@@ -9,8 +9,8 @@ export async function handleContractBasedExpense(ctx: MyContext) {
     if (!userActions) return;
     await ctx.reply(
       userActions.data.language === 'uz'
-        ? 'Shartnoma raqami yoki shartnoma unikal Idsini kiriting :'
-        : 'Введите номер контракта или его уникальный ID:'
+        ? 'Shartnoma raqamini kiriting :'
+        : 'Введите номер контракта:'
     );
 
     const { expenseBasedContractId, ...rest } = userActions.data;
